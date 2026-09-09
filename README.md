@@ -1,6 +1,6 @@
 # 4i, explained interactively
 
-An interactive walkthrough of the chemistry behind **iterative indirect immunofluorescence imaging (4i)** — what bonds form at each step, what the elution buffer actually breaks, and why the specimen survives being chemically stripped twenty times.
+An interactive walkthrough of the chemistry behind **iterative indirect immunofluorescence imaging (4i)** — what bonds form at each step, what the elution buffer actually breaks, and why the fixed cells can survive being chemically stripped multiple times.
 
 **[▶ Open the explainer](https://laelise.github.io/4i-explainer/)**
 
