@@ -1698,8 +1698,10 @@ function tick(now){
   }
   if (stKey === "fix"){
     const f = clamp(fix, 0, 1);
-    L.fixCH2O.setAttribute("opacity", (1-f*0.85).toFixed(2));
-    L.fixCH2O.setAttribute("transform", `translate(0, ${(f*46).toFixed(1)})`);
+    // formaldehyde descends into the bridge and is fully consumed by the time
+    // the —CH₂— label appears, so the two labels never share a line
+    L.fixCH2O.setAttribute("opacity", clamp(1 - (f-0.10)/0.30, 0, 1).toFixed(2));
+    L.fixCH2O.setAttribute("transform", `translate(0, ${(f*26).toFixed(1)})`);
     L.fixBridge.setAttribute("opacity", clamp((f-0.35)/0.5, 0, 1).toFixed(2));
     L.fixAld.setAttribute("opacity", clamp((f-0.7)/0.3, 0, 1).toFixed(2));
   }
