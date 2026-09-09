@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>4i — Iterative Indirect Immunofluorescence Imaging</title>
 <meta name="author" content="Lauryn Elise Bailey">
-<meta name="description" content="An interactive walkthrough of the chemistry behind iterative indirect immunofluorescence imaging (4i): what bonds form at each step, what the elution buffer breaks, and why the specimen survives being stripped twenty times. Built by Lauryn Elise Bailey, Purvis Lab, UNC-Chapel Hill.">
+<meta name="description" content="An interactive walkthrough of the chemistry behind iterative indirect immunofluorescence imaging (4i): what bonds form at each step, what the elution buffer breaks, and why the sample survives being stripped twenty times. Built by Lauryn Elise Bailey, Purvis Lab, UNC-Chapel Hill.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="4i, explained interactively">
 <meta property="og:description" content="The chemistry behind iterative indirect immunofluorescence imaging — bond by bond, step by step.">
@@ -368,7 +368,7 @@
       <h2 id="aboutH">About this explainer</h2>
       <p>An interactive walkthrough of the chemistry behind iterative indirect
          immunofluorescence imaging — what bonds form at each step, what the elution
-         buffer breaks, and why the specimen survives being stripped twenty times.</p>
+         buffer breaks, and why the sample survives being stripped twenty times.</p>
 
       <h3>The method</h3>
       <p>4i was developed in the Pelkmans lab at the University of Zurich. This explainer
@@ -1188,7 +1188,7 @@ const STEPS = [
       ["make","Free aldehyde groups","Unwanted. Some CH₂O never finds a second partner."],
       ["make","Compartments locked","Bridges span 2–3 Å, so nothing crosslinks across the envelope. A nuclear protein stays nuclear."]
     ],
-    callout:"Your antigens are now welded into the specimen. Everything that follows depends on this and only this.",
+    callout:"Your antigens are now welded into the sample. Everything that follows depends on this and only this.",
     apply(){
       set("membrane",1); set("fixed",1); set("perm",0); set("aldQ",0);
       set("ab1",0); set("ab2",0); set("glow",0);
@@ -1240,7 +1240,7 @@ const STEPS = [
     eyebrow:"Step 4 · 1° antibody in cBS, overnight",
     head:"Nothing covalent forms here",
     lede:"The antibody is held to its epitope by hydrogen bonds, shape-complementary van der Waals contact, the hydrophobic effect, and a small number of salt bridges. Nanomolar affinity — very tight, and every single interaction is breakable by changing the solvent.",
-    more:"The antibody arrives after fixation, so it never gets crosslinked into the specimen. That asymmetry — covalent antigen, non-covalent antibody — is the entire basis of the method.",
+    more:"The antibody arrives after fixation, so it never gets crosslinked into the sample. That asymmetry — covalent antigen, non-covalent antibody — is the entire basis of the method.",
     ledger:[
       ["make","Hydrogen bonds","Directional, and water can compete for them."],
       ["make","Hydrophobic contact","Entropic. Often the largest single term."],
@@ -1491,7 +1491,7 @@ function eluteNotes(){
   h += `</div>`;
   const gone = c > .6 && a > .5 && t > .5;
   h += `<div class="callout"><b>${gone
-    ? 'Antibody gone. Specimen untouched.'
+    ? 'Antibody gone. Sample untouched.'
     : 'Turn all three up.'}</b> ${gone
     ? 'Every non-covalent interaction is broken and the IgG has come apart at its interchain disulfides, so it cannot refold and rebind. The antigen never moved — it is covalently bridged into the cell.'
     : 'Each reagent only breaks its own class of bond. Chaotrope alone leaves the salt bridges holding; acid alone leaves the hydrogen bonding intact. The buffer needs all three.'}</div>`;
