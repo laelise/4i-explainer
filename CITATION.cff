@@ -1,0 +1,56 @@
+cff-version: 1.2.0
+title: "4i, explained interactively"
+message: "If you use this explainer, please cite it as below, and cite the primary 4i papers listed in the references."
+type: software
+authors:
+  - given-names: "Lauryn Elise"
+    family-names: "Bailey"
+    affiliation: "Purvis Lab, Department of Genetics, University of North Carolina at Chapel Hill"
+    email: "lbailey@unc.edu"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+repository-code: "https://github.com/laelise/4i-explainer"
+url: "https://laelise.github.io/4i-explainer/"
+abstract: >-
+  An interactive, single-file browser explainer for the chemistry of iterative
+  indirect immunofluorescence imaging (4i): the covalent crosslinking that
+  anchors antigens during fixation, the quenching chemistry that keeps antibody
+  from being captured permanently, and the three-part elution buffer that
+  removes antibody without removing the specimen.
+keywords:
+  - 4i
+  - multiplexed imaging
+  - immunofluorescence
+  - science communication
+license: MIT
+date-released: "2026-09-08"
+references:
+  - type: article
+    title: "Multiplexed protein maps link subcellular organization to cellular states"
+    authors:
+      - given-names: "Gabriele"
+        family-names: "Gut"
+      - given-names: "Markus D."
+        family-names: "Herrmann"
+      - given-names: "Lucas"
+        family-names: "Pelkmans"
+    journal: "Science"
+    volume: 361
+    issue: 6401
+    year: 2018
+    doi: "10.1126/science.aar7042"
+  - type: article
+    title: "Iterative Indirect Immunofluorescence Imaging (4i) on Adherent Cells and Tissue Sections"
+    authors:
+      - given-names: "Bernhard A."
+        family-names: "Kramer"
+      - given-names: "Jacobo"
+        family-names: "Sarabia del Castillo"
+      - given-names: "Lucas"
+        family-names: "Pelkmans"
+      - given-names: "Gabriele"
+        family-names: "Gut"
+    journal: "Bio-protocol"
+    volume: 13
+    issue: 13
+    year: 2023
+    doi: "10.21769/BioProtoc.4712"

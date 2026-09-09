@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4i — Iterative Indirect Immunofluorescence Imaging</title>
+<meta name="author" content="Lauryn Elise Bailey">
+<meta name="description" content="An interactive walkthrough of the chemistry behind iterative indirect immunofluorescence imaging (4i): what bonds form at each step, what the elution buffer breaks, and why the specimen survives being stripped twenty times. Built by Lauryn Elise Bailey, Purvis Lab, UNC-Chapel Hill.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="4i, explained interactively">
+<meta property="og:description" content="The chemistry behind iterative indirect immunofluorescence imaging — bond by bond, step by step.">
+<meta property="og:url" content="https://laelise.github.io/4i-explainer/">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root{
+    --field:#08141c;
+    --field-2:#0e2331;
+    --teal:#12607f;
+    --teal-deep:#0d4a63;
+    --sky:#a9cde5;
+    --paper:#ffffff;
+    --panel:#f4f8fa;
+    --rule:#d9e3e9;
+    --ink:#0c2634;
+    --ink-soft:#5c7889;
+    --amber:#f0b429;
+    --cyan:#4fc3e8;
+    --slate:#8296a6;
+    --rose:#f2685b;
+    --violet:#a78be0;
+    --mint:#35bfa8;
+    --disulf:#f5d76e;
+    --shadow:0 1px 2px rgba(12,38,52,.06), 0 8px 24px rgba(12,38,52,.07);
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background:var(--panel);
+    -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- shell ---------- */
+  .app{
+    height:100vh;
+    display:grid;
+    grid-template-rows:auto 1fr;
+    max-width:1560px;
+    margin:0 auto;
+    background:var(--paper);
+  }
+
+  header.bar{
+    display:flex;align-items:baseline;gap:20px;
+    padding:14px 26px 13px;
+    border-bottom:1px solid var(--rule);
+  }
+  .mark{
+    font-size:21px;font-weight:700;letter-spacing:-.02em;color:var(--teal);
+    line-height:1;
+  }
+  .mark span{font-weight:400;color:var(--ink-soft);font-size:14px;margin-left:9px;letter-spacing:0}
+  .bar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+  .roundpill{
+    display:flex;align-items:baseline;gap:7px;
+    padding:5px 12px;border-radius:20px;
+    background:var(--sky);color:var(--teal-deep);
+    font-size:12.5px;font-weight:600;
+  }
+  .roundpill b{font-size:15px;font-weight:700}
+
+  .btn{
+    font:inherit;font-size:12.5px;font-weight:550;
+    padding:6px 12px;border-radius:7px;
+    border:1px solid var(--rule);background:var(--paper);color:var(--ink);
+    cursor:pointer;transition:background .13s, border-color .13s;
+  }
+  .btn:hover{background:var(--panel);border-color:#c3d2db}
+  .btn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .btn.on{background:var(--teal);border-color:var(--teal);color:#fff}
+
+  /* ---------- body grid ---------- */
+  .body{
+    display:grid;
+    grid-template-columns:246px minmax(0,1fr) 322px;
+    min-height:0;
+  }
+
+  /* ---------- step rail ---------- */
+  .rail{
+    border-right:1px solid var(--rule);
+    padding:16px 0 20px;
+    overflow-y:auto;
+    background:var(--paper);
+  }
+  .rail h2{
+    font-size:11px;font-weight:600;color:var(--ink-soft);
+    margin:0 0 10px 22px;letter-spacing:.04em;
+  }
+  .steps{list-style:none;margin:0;padding:0;position:relative}
+  .steps::before{
+    content:"";position:absolute;left:33px;top:16px;bottom:16px;
+    width:1px;background:var(--rule);
+  }
+  .step{
+    position:relative;display:flex;gap:13px;align-items:flex-start;
+    width:100%;text-align:left;background:none;border:0;
+    padding:9px 18px 9px 22px;cursor:pointer;font:inherit;color:var(--ink-soft);
+    transition:color .13s;
+  }
+  .step:hover{color:var(--ink)}
+  .step:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  .dot{
+    flex:0 0 auto;width:23px;height:23px;border-radius:50%;
+    background:var(--paper);border:1.5px solid var(--rule);
+    display:grid;place-items:center;
+    font-size:11px;font-weight:650;color:var(--ink-soft);
+    position:relative;z-index:1;transition:all .16s;
+  }
+  .step-txt{padding-top:2px;min-width:0}
+  .step-name{font-size:13.5px;font-weight:550;line-height:1.3;color:inherit}
+  .step-sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;line-height:1.35;opacity:.85}
+  .step.done .dot{background:var(--sky);border-color:var(--sky);color:var(--teal-deep)}
+  .step.active{color:var(--ink)}
+  .step.active .dot{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:0 0 0 4px rgba(18,96,127,.13)}
+  .step.active .step-name{font-weight:650;color:var(--teal-deep)}
+
+  .railfoot{margin:16px 22px 0;padding-top:14px;border-top:1px solid var(--rule)}
+  .railfoot p{font-size:11.5px;line-height:1.9;color:var(--ink-soft);margin:0 0 9px}
+  .railfoot p.keys{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;line-height:1.4}
+  kbd{
+    font-family:var(--mono);font-size:10.5px;background:var(--panel);
+    border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;
+    padding:1px 5px;color:var(--ink);
+  }
+
+  /* ---------- stage ---------- */
+  .stage{display:flex;flex-direction:column;min-width:0;background:var(--paper)}
+  .field{
+    flex:1;min-height:0;position:relative;
+    background:
+      radial-gradient(120% 95% at 30% 8%, #16303f 0%, var(--field-2) 42%, var(--field) 100%);
+    overflow:hidden;
+  }
+  .field svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+  .fieldtag{
+    position:absolute;left:18px;top:15px;z-index:3;pointer-events:none;
+  }
+  .fieldtag .t1{font-size:15px;font-weight:600;color:#eaf4f9;letter-spacing:-.01em}
+  .fieldtag .t2{font-size:11.5px;color:#7fa3b6;margin-top:3px}
+
+  /* control strip under the field */
+  .strip{
+    border-top:1px solid var(--rule);
+    padding:13px 22px 15px;
+    min-height:96px;
+    display:flex;align-items:center;gap:26px;
+    background:var(--paper);
+  }
+  .legend{display:flex;flex-wrap:wrap;gap:7px 20px;align-items:center}
+  .lg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-soft);white-space:nowrap}
+  .lg svg{flex:0 0 auto}
+  .lg.dead{opacity:.32;text-decoration:line-through}
+  .lg b{color:var(--ink);font-weight:600}
+
+  .sliders{display:flex;gap:22px;width:100%;flex-wrap:wrap}
+  .sl{flex:1 1 190px;min-width:170px}
+  .sl-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .sl-name{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .sl-val{font-family:var(--mono);font-size:11.5px;color:var(--teal);font-weight:600}
+  .sl-note{font-size:11px;color:var(--ink-soft);margin-top:5px;line-height:1.35;min-height:29px}
+  input[type=range]{
+    width:100%;appearance:none;height:4px;border-radius:3px;
+    background:var(--rule);outline:none;margin:0;cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    appearance:none;width:16px;height:16px;border-radius:50%;
+    background:var(--paper);border:2px solid var(--teal);cursor:grab;
+    box-shadow:0 1px 3px rgba(12,38,52,.25);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px;height:16px;border-radius:50%;
+    background:var(--paper);border:2px solid var(--teal);cursor:grab;
+    box-shadow:0 1px 3px rgba(12,38,52,.25);
+  }
+  input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(18,96,127,.22)}
+
+  /* ---------- notes panel ---------- */
+  .notes{
+    border-left:1px solid var(--rule);
+    padding:20px 22px 26px;
+    overflow-y:auto;
+    background:var(--paper);
+  }
+  .notes h3{
+    font-size:17px;font-weight:650;letter-spacing:-.015em;
+    margin:0 0 3px;color:var(--ink);line-height:1.25;
+  }
+  .eyebrow{font-size:11.5px;color:var(--teal);font-weight:600;margin:0 0 10px}
+  .notes p.lede{font-size:13.5px;line-height:1.58;color:var(--ink);margin:0 0 14px}
+  .notes p.more{font-size:12.5px;line-height:1.6;color:var(--ink-soft);margin:0 0 14px}
+
+  .chem{
+    background:var(--field);border-radius:8px;
+    padding:11px 13px;margin:0 0 14px;
+    font-family:var(--mono);font-size:10.5px;line-height:1.7;
+    color:#cfe4ee;white-space:pre-wrap;word-break:break-word;
+  }
+  .chem .hl{color:var(--amber);font-weight:600}
+  .chem .br{color:var(--rose)}
+
+  .ledger{margin:0 0 14px}
+  .lrow{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--rule)}
+  .lrow:last-child{border-bottom:1px solid var(--rule)}
+  .ltag{
+    flex:0 0 auto;margin-top:1px;font-size:10px;font-weight:700;
+    padding:2px 6px;border-radius:4px;letter-spacing:.02em;
+  }
+  .ltag.make{background:#e4f6f1;color:#12775f}
+  .ltag.brk{background:#fdeceb;color:#b4362c}
+  .ltxt{font-size:12.5px;line-height:1.45}
+  .ltxt b{font-weight:600}
+  .ltxt em{font-style:normal;color:var(--ink-soft);display:block;font-size:11.5px;margin-top:1px}
+
+  .callout{
+    border-left:3px solid var(--amber);
+    background:#fdf6e6;border-radius:0 7px 7px 0;
+    padding:11px 13px;margin:0 0 14px;
+    font-size:12.5px;line-height:1.55;color:#6b4d10;
+  }
+  .callout b{color:#4a3407}
+
+  .markers{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+  .mk{
+    font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;
+    background:var(--panel);border:1px solid var(--rule);color:var(--ink-soft);
+  }
+  .mk.lit{background:var(--sky);border-color:var(--sky);color:var(--teal-deep)}
+
+  .nav{display:flex;gap:8px;margin-top:20px}
+  .nav .btn{flex:1;padding:9px 12px;font-weight:600}
+  .nav .btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+  .nav .btn.primary:hover{background:var(--teal-deep);border-color:var(--teal-deep)}
+  .nav .btn:disabled{opacity:.4;cursor:default}
+
+  /* svg helpers */
+  .lbl{font-family:var(--sans);font-size:11px;fill:#8fb3c6}
+  .lbl-b{font-family:var(--sans);font-size:11.5px;font-weight:600;fill:#dcecf4}
+  .lbl-sm{font-family:var(--sans);font-size:9.5px;fill:#7fa3b6}
+
+  .sheet{
+    position:fixed;inset:0;z-index:50;
+    background:rgba(8,20,28,.55);
+    display:grid;place-items:center;padding:24px;
+  }
+  .sheet[hidden]{display:none}
+  .sheet-in{
+    position:relative;background:var(--paper);border-radius:12px;
+    max-width:560px;width:100%;max-height:82vh;overflow-y:auto;
+    padding:26px 30px 30px;box-shadow:0 24px 60px rgba(8,20,28,.3);
+  }
+  .sheet-x{
+    position:absolute;top:12px;right:14px;border:0;background:none;
+    font-size:24px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:4px 8px;
+  }
+  .sheet-x:hover{color:var(--ink)}
+  .sheet-in h2{font-size:19px;font-weight:650;margin:0 0 12px;letter-spacing:-.015em}
+  .sheet-in h3{font-size:12.5px;font-weight:650;color:var(--teal);margin:20px 0 7px}
+  .sheet-in p{font-size:13px;line-height:1.6;margin:0 0 10px;color:var(--ink)}
+  .sheet-in p.ref{font-size:12px;color:var(--ink-soft);padding-left:14px;border-left:2px solid var(--rule)}
+  .sheet-in p.fine{font-size:11.5px;color:var(--ink-soft);margin-top:18px}
+  .sheet-in a{color:var(--teal)}
+  .contact{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:7px}
+  .contact li{display:flex;align-items:baseline;gap:10px;font-size:12.5px;line-height:1.45}
+  .contact .ct-k{
+    flex:0 0 84px;font-size:10.5px;font-weight:650;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-soft);
+  }
+  .contact a{word-break:break-word}
+  .byline{
+    font-size:11.5px;line-height:1.5;color:var(--ink-soft);
+    margin:12px 0 0;padding-top:11px;border-top:1px solid var(--rule);
+  }
+  .byline b{color:var(--ink);font-weight:600}
+  .byline a{color:var(--teal)}
+  @media (max-width:520px){
+    .contact li{flex-direction:column;gap:1px}
+    .contact .ct-k{flex:none}
+  }
+
+  @media (max-width:1180px){
+    .body{grid-template-columns:200px minmax(0,1fr) 280px}
+    .step-sub{display:none}
+  }
+  @media (max-width:900px){
+    .app{height:auto}
+    .body{grid-template-columns:1fr}
+    .rail{border-right:0;border-bottom:1px solid var(--rule)}
+    .steps::before{display:none}
+    .steps{display:flex;overflow-x:auto;gap:2px}
+    .step{flex-direction:column;align-items:center;padding:10px 12px;min-width:64px}
+    .step-txt{text-align:center}
+    .step-name{font-size:11px}
+    .field{height:56vh}
+    .notes{border-left:0;border-top:1px solid var(--rule)}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition-duration:.001ms !important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="bar">
+    <div class="mark">4i<span>Iterative indirect immunofluorescence imaging</span></div>
+    <div class="bar-right">
+      <div class="roundpill">Round <b id="roundNum">1</b><span id="mkCount">· 0 markers</span></div>
+      <button class="btn" id="btnCov" title="Key X">Highlight covalent bonds</button>
+      <button class="btn" id="btnSvg" title="Opens natively in Illustrator">Export SVG</button>
+      <button class="btn" id="btnFs" title="Key F">Full screen</button>
+      <button class="btn" id="btnAbout" title="Credits and sources">About</button>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <nav class="rail" aria-label="Protocol steps">
+      <h2>Protocol</h2>
+      <ul class="steps" id="rail"></ul>
+      <div class="railfoot">
+        <p class="keys"><span><kbd>&larr;</kbd> <kbd>&rarr;</kbd> step</span> <span><kbd>X</kbd> covalent</span> <span><kbd>F</kbd> full screen</span></p>
+        <p>Chemistry and buffer concentrations follow the published 4i protocol. Sources under <b>About</b>.</p>
+        <p class="byline">Built by <b>Lauryn Elise Bailey</b><br>
+           Purvis Lab, UNC-Chapel Hill<br>
+           <a href="#" id="bylineLink">References &amp; contact &rarr;</a></p>
+      </div>
+    </nav>
+
+    <main class="stage">
+      <div class="field">
+        <div class="fieldtag">
+          <div class="t1" id="fieldT1">Live cell</div>
+          <div class="t2" id="fieldT2">Adhered on coated glass, cross-section</div>
+        </div>
+        <svg id="scene" viewBox="0 0 980 640" preserveAspectRatio="xMidYMid meet"
+             xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Molecular animation of the current 4i step"></svg>
+      </div>
+      <div class="strip" id="strip"></div>
+    </main>
+
+    <aside class="notes" id="notes"></aside>
+
+  </div>
+
+  <div class="sheet" id="about" role="dialog" aria-modal="true" aria-labelledby="aboutH" hidden>
+    <div class="sheet-in">
+      <button class="sheet-x" id="aboutX" aria-label="Close">&times;</button>
+      <h2 id="aboutH">About this explainer</h2>
+      <p>An interactive walkthrough of the chemistry behind iterative indirect
+         immunofluorescence imaging — what bonds form at each step, what the elution
+         buffer breaks, and why the specimen survives being stripped twenty times.</p>
+
+      <h3>The method</h3>
+      <p>4i was developed in the Pelkmans lab at the University of Zurich. This explainer
+         is an independent educational illustration of their published method. It is not
+         affiliated with or endorsed by its authors.</p>
+      <p class="ref">Gut G, Herrmann MD, Pelkmans L. Multiplexed protein maps link
+         subcellular organization to cellular states. <em>Science</em>. 2018;361(6401):eaar7042.
+         <a href="https://doi.org/10.1126/science.aar7042" target="_blank" rel="noopener">doi:10.1126/science.aar7042</a></p>
+      <p class="ref">Kramer BA, Sarabia del Castillo J, Pelkmans L, Gut G. Iterative Indirect
+         Immunofluorescence Imaging (4i) on Adherent Cells and Tissue Sections.
+         <em>Bio-protocol</em>. 2023;13(13):e4712.
+         <a href="https://doi.org/10.21769/BioProtoc.4712" target="_blank" rel="noopener">doi:10.21769/BioProtoc.4712</a></p>
+
+      <h3>Built by</h3>
+      <p id="aboutAuthor"></p>
+      <ul class="contact" id="aboutContact"></ul>
+
+      <h3>Citing this explainer</h3>
+      <p class="ref">Bailey LE. 4i, explained interactively. 2026.
+         <a href="https://laelise.github.io/4i-explainer/" target="_blank" rel="noopener">laelise.github.io/4i-explainer</a><br>
+         Please cite the papers above for the method itself.</p>
+
+      <h3>Scope</h3>
+      <p>Every scene is a schematic of interaction classes, not a structural model.
+         Bond geometry, antibody pose and protein shape are illustrative. Buffer
+         concentrations shown on the elution controls reflect the published working
+         values. Nothing here contains experimental data.</p>
+
+      <p class="fine">Diagrams built as SVG. Use <b>Export SVG</b> to download the current
+         frame as an editable vector file.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   SVG helpers
+   ============================================================ */
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("scene");
+
+function el(tag, attrs, parent){
+  const n = document.createElementNS(NS, tag);
+  if (attrs) for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+function g(parent, id){ return el("g", id ? {id} : null, parent); }
+function txt(parent, x, y, s, cls, anchor){
+  const t = el("text", {x, y, class: cls || "lbl"}, parent);
+  if (anchor) t.setAttribute("text-anchor", anchor);
+  t.textContent = s;
+  return t;
+}
+const lerp = (a,b,t) => a + (b-a)*t;
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ============================================================
+   AUTHOR — edit these lines, then re-save the file.
+   Each contact entry is [label, href, display text].
+   ============================================================ */
+const AUTHOR = {
+  name:  "Lauryn Elise Bailey",
+  role:  "Purvis Lab, Department of Genetics, UNC-Chapel Hill",
+  links: [
+    ["Email",       "mailto:lbailey@unc.edu",                        "lbailey@unc.edu"],
+    ["LinkedIn",    "https://www.linkedin.com/in/laurynelisebailey", "in/laurynelisebailey"],
+    ["GitHub",      "https://github.com/laelise",                    "github.com/laelise"],
+    ["Lab website", "https://www.med.unc.edu/genetics/purvislab/",   "med.unc.edu/genetics/purvislab"]
+  ]
+};
+
+/* ============================================================
+   State
+   ============================================================ */
+const S = {
+  step: 0,
+  round: 1,
+  covMode: false,
+  // animated 0..1 values: [current, target]
+  v: {
+    membrane: [1,1],     // bilayer intact
+    fixed:    [0,0],     // methylene bridges formed
+    perm:     [0,0],     // permeabilised
+    aldQ:     [0,0],     // aldehydes quenched
+    thiolsOn: [0,0],     // free thiols present
+    thiolCap: [0,0],     // thiols capped
+    ab1:      [0,0],     // primary bound
+    ab2:      [0,0],     // secondary bound
+    glow:     [0,0],     // fluorophore emission
+    chao:     [0,0],     // chaotrope  (user)
+    acid:     [0,0],     // low pH     (user)
+    tcep:     [0,0]      // reductant  (user)
+  }
+};
+function set(k, t){ S.v[k][1] = t; }
+function cur(k){ return S.v[k][0]; }
+
+const MARKERS = ["DNA","cycB","pS10","Ki67","CDK4","pRB","RB","p21","cycD1","cycE","MDM2","CDK6"];
+
+/* ============================================================
+   Static geometry — cell cross-section
+   ============================================================ */
+const GLASS_Y = 552;
+
+// Adherent cell in cross-section: thin spread lamellae, thick perinuclear dome.
+// Top membrane only. The fill closes down onto the glass, so the cell reads as a
+// spread adherent cell: thick flat lamellae either side of a perinuclear dome.
+// Spread adherent cell: broad, low, with a flat plateau over a flattened nucleus.
+const CELL_OUTLINE =
+  "M 20,524 C 80,532 116,530 152,516 C 190,502 198,414 250,406 " +
+  "C 282,401 302,401 334,406 C 386,414 394,502 432,516 " +
+  "C 468,530 500,532 516,524";
+const CELL_FILL = CELL_OUTLINE + " L 516,552 L 20,552 Z";
+
+// A nucleus in an adherent cell is a flattened disc, not a sphere.
+const NUC = { cx: 292, cy: 470, rx: 88, ry: 38 };
+
+// antigen positions, tagged by compartment
+const PROTEINS = [
+  {x:244, y:462, r:11, comp:"n"},
+  {x:296, y:492, r:10, comp:"n"},
+  {x:330, y:462, r:13, comp:"n"},   // index 2 = the target antigen
+  {x:346, y:484, r:9,  comp:"n"},
+  {x:238, y:486, r:9,  comp:"n"},
+  {x:292, y:418, r:9,  comp:"c"},
+  {x:110, y:538, r:8,  comp:"c"},
+  {x:470, y:538, r:8,  comp:"c"},
+  {x:416, y:528, r:8,  comp:"c"},
+  {x:172, y:532, r:8,  comp:"c"},
+  {x:60,  y:540, r:6,  comp:"c"}
+];
+const TARGET = 2;
+
+// methylene bridges — only ever between proteins in the same compartment
+const BRIDGES = [
+  [0,1],[1,2],[2,3],[1,3],[0,4],[4,1],
+  [6,9],[9,10],[7,8]
+];
+
+// detail-inset frame (right side)
+const INSET = { cx: 748, cy: 268, r: 192 };
+
+/* ============================================================
+   Scene layer construction (built once, shown/hidden per step)
+   ============================================================ */
+let L = {}; // layers
+
+// Place every protein wholly inside its own compartment. Searches outward from the
+// seed for the nearest valid spot, so it can never run away off-canvas.
+function fitProteins(cellPath){
+  let supported = true;
+  const inCell = (x,y) => {
+    try { return cellPath.isPointInFill(new DOMPoint(x,y)); }
+    catch(e){ supported = false; return true; }
+  };
+  const insideCell = (x,y,r) => {
+    if (!inCell(x,y)) return false;
+    for (let a=0; a<12; a++){
+      const th = a/12*6.283;
+      if (!inCell(x + Math.cos(th)*(r+2.5), y + Math.sin(th)*(r+2.5))) return false;
+    }
+    return true;
+  };
+  const nucNorm = (x,y,pad) =>
+    Math.hypot((x-NUC.cx)/(NUC.rx+pad), (y-NUC.cy)/(NUC.ry+pad));
+
+  PROTEINS.forEach(p => {
+    if (p.comp === "n"){
+      const k = nucNorm(p.x, p.y, -(p.r+5));
+      if (k > 1){
+        p.x = NUC.cx + (p.x-NUC.cx)/k;
+        p.y = NUC.cy + (p.y-NUC.cy)/k;
+      }
+      return;
+    }
+    const ok = (x,y) => nucNorm(x,y,p.r+4) >= 1 && insideCell(x,y,p.r);
+    if (ok(p.x, p.y)) return;
+    // ring search outward from the seed, nearest valid position wins
+    for (let rad=3; rad<=150; rad+=3){
+      const steps = Math.max(12, Math.round(rad*0.7));
+      for (let i=0; i<steps; i++){
+        const th = (i/steps)*6.283;
+        const x = p.x + Math.cos(th)*rad, y = p.y + Math.sin(th)*rad;
+        if (ok(x,y)){ p.x = x; p.y = y; return; }
+      }
+      if (!supported) return;                  // no DOMPoint: keep the seed
+    }
+  });
+}
+
+function buildScene(){
+  svg.innerHTML = "";
+
+  // defs -------------------------------------------------
+  const defs = el("defs", null, svg);
+
+  const glow = el("filter", {id:"glow", x:"-60%", y:"-60%", width:"220%", height:"220%"}, defs);
+  el("feGaussianBlur", {stdDeviation:"5", result:"b"}, glow);
+  const gm = el("feMerge", null, glow);
+  el("feMergeNode", {in:"b"}, gm); el("feMergeNode", {in:"SourceGraphic"}, gm);
+
+  const soft = el("filter", {id:"soft", x:"-40%", y:"-40%", width:"180%", height:"180%"}, defs);
+  el("feGaussianBlur", {stdDeviation:"2.4"}, soft);
+
+  const cyto = el("radialGradient", {id:"cyto", cx:"38%", cy:"28%"}, defs);
+  el("stop", {offset:"0%", "stop-color":"#2b5a72"}, cyto);
+  el("stop", {offset:"100%", "stop-color":"#17384b"}, cyto);
+
+  const clipCell = el("clipPath", {id:"clipCell"}, defs);
+  el("rect", {x:0, y:0, width:980, height:GLASS_Y}, clipCell);
+
+  const clipShape = el("clipPath", {id:"clipShape"}, defs);
+  el("path", {d:CELL_FILL}, clipShape);
+
+  const clipInset = el("clipPath", {id:"clipInset"}, defs);
+  el("circle", {cx:INSET.cx, cy:INSET.cy, r:INSET.r-1}, clipInset);
+
+  // ---- main view ---------------------------------------
+  // Everything cell-side is drawn at native size inside one scaled group, anchored so
+  // the glass line stays exactly on GLASS_Y. Change K alone to resize the whole cell.
+  const K = 1.14, KX = 20*(1-K), KY = GLASS_Y*(1-K);
+  L.view = el("g", {id:"view", transform:`translate(${KX},${KY}) scale(${K})`}, svg);
+  L.toView = (x,y) => ({ x: KX + x*K, y: KY + y*K });
+
+  L.main = el("g", {id:"main", "clip-path":"url(#clipCell)"}, L.view);
+
+  // cytoplasm — the cell body
+  L.cyto = el("path", {d:CELL_FILL, fill:"url(#cyto)", stroke:"none"}, L.main);
+  el("path", {d:CELL_OUTLINE, fill:"none", stroke:"#4d87a4", "stroke-width":1, opacity:.5}, L.main);
+
+  // cytoskeleton, faint, so the cytoplasm reads as cytoplasm
+  L.cytoskel = el("g", {id:"cytoskel", "clip-path":"url(#clipShape)"}, L.main);
+  [[54,548,226,470],[104,548,286,424],[152,548,330,486],
+   [488,548,352,428],[438,548,384,486],[204,548,240,446]].forEach(([x1,y1,x2,y2]) => {
+    el("line", {x1, y1, x2, y2, stroke:"#3a6c86", "stroke-width":1.1,
+                opacity:.34, "stroke-linecap":"round"}, L.cytoskel);
+  });
+  // mitochondria
+  [[102,538,-5],[486,538,6],[292,420,-3],[404,530,10]].forEach(([x,y,rot]) => {
+    el("rect", {x:x-13, y:y-5, width:26, height:10, rx:5, fill:"#2d6d7e",
+      opacity:.5, transform:`rotate(${rot},${x},${y})`}, L.cytoskel);
+  });
+
+  // ---- nucleus ----
+  const nuc = g(L.main, "nucleusGrp");
+  L.nucleus = el("ellipse", {cx:NUC.cx, cy:NUC.cy, rx:NUC.rx, ry:NUC.ry,
+                             fill:"#1b5a80", opacity:.92}, nuc);
+  // chromatin texture
+  const chrom = g(nuc);
+  for (let i=0;i<26;i++){
+    const a = Math.random()*6.283, rr = Math.sqrt(Math.random())*0.86;
+    el("circle", {cx: NUC.cx + Math.cos(a)*NUC.rx*rr,
+                  cy: NUC.cy + Math.sin(a)*NUC.ry*rr,
+                  r: 3 + Math.random()*5, fill:"#2a7ba8", opacity:.5}, chrom);
+  }
+  // nucleolus
+  el("circle", {cx:NUC.cx+26, cy:NUC.cy+12, r:13, fill:"#3d94c2", opacity:.62}, nuc);
+  L.nucGlow = el("ellipse", {cx:NUC.cx, cy:NUC.cy, rx:NUC.rx, ry:NUC.ry,
+                             fill:"#4fd0ff", opacity:0, filter:"url(#glow)"}, nuc);
+
+  // nuclear envelope — two membranes, with pores
+  L.nucEnv = g(L.main, "nucEnv");
+  L.nucEnvNodes = [];
+  for (let i=0;i<46;i++){
+    const a = (i/46)*6.283;
+    const ca = Math.cos(a), sa = Math.sin(a);
+    // outward normal of an ellipse
+    let nx = ca/NUC.rx, ny = sa/NUC.ry;
+    const m = Math.hypot(nx, ny); nx/=m; ny/=m;
+    const x = NUC.cx + ca*NUC.rx, y = NUC.cy + sa*NUC.ry;
+    const grp = g(L.nucEnv);
+    const isPore = (i % 7 === 0);
+    if (isPore){
+      el("circle", {cx:x + nx*3, cy:y + ny*3, r:4.6, fill:"none",
+        stroke:"#8fd0ec", "stroke-width":1.8, opacity:.9}, grp);
+    } else {
+      el("circle", {cx:x + nx*3.4, cy:y + ny*3.4, r:2.5, fill:"#7fc0dd"}, grp);
+      el("circle", {cx:x - nx*2.6, cy:y - ny*2.6, r:2.5, fill:"#5a9ec0"}, grp);
+    }
+    L.nucEnvNodes.push({node:grp, nx, ny, pore:isPore, seed:Math.random()*6.28});
+  }
+
+  // ---- plasma membrane, sampled along the cell outline ----
+  L.membrane = g(L.main, "membrane");
+  L.lipids = [];
+  const probe = el("path", {d:CELL_OUTLINE, fill:"none", stroke:"none"}, L.main);
+  const total = probe.getTotalLength();
+  const N = 96;
+  for (let i=0; i<=N; i++){
+    const d = (i/N)*total;
+    const pt = probe.getPointAtLength(d);
+    const p2 = probe.getPointAtLength(Math.min(total, d+1.5));
+    const p1 = probe.getPointAtLength(Math.max(0, d-1.5));
+    let tx = p2.x-p1.x, ty = p2.y-p1.y;
+    const m = Math.hypot(tx,ty) || 1; tx/=m; ty/=m;
+    const nx = ty, ny = -tx;                    // outward normal
+    const grp = g(L.membrane);
+    el("circle", {cx:pt.x + nx*3.2, cy:pt.y + ny*3.2, r:3.0, fill:"#8fc6de"}, grp);
+    el("circle", {cx:pt.x - nx*3.6, cy:pt.y - ny*3.6, r:3.0, fill:"#5d95b2"}, grp);
+    el("line", {x1:pt.x + nx*0.4, y1:pt.y + ny*0.4, x2:pt.x - nx*1.0, y2:pt.y - ny*1.0,
+                stroke:"#4e7f99", "stroke-width":1.4}, grp);
+    L.lipids.push({node:grp, x:pt.x, y:pt.y, nx, ny, seed:Math.random()*6.28});
+  }
+  probe.remove();
+
+  // compartment labels, set outside the cell with leader ticks
+  L.compLabels = g(L.view, "compLabels");
+  el("line", {x1:150, y1:414, x2:246, y2:456, stroke:"#5f93ad",
+              "stroke-width":1, opacity:.55}, L.compLabels);
+  const nl = txt(L.compLabels, 146, 408, "nucleus", "lbl", "end");
+  nl.setAttribute("fill", "#9fd2ee");
+  el("line", {x1:478, y1:436, x2:448, y2:522, stroke:"#5f93ad",
+              "stroke-width":1, opacity:.55}, L.compLabels);
+  const cl = txt(L.compLabels, 484, 432, "cytoplasm", "lbl", "start");
+  cl.setAttribute("fill", "#8fc6de");
+
+  // Solve protein placement against the actual cell path and nucleus ellipse,
+  // so nothing pokes through a membrane no matter how the outline is tweaked.
+  fitProteins(L.cyto);
+
+  // methylene bridges
+  L.bridges = g(L.main, "bridges");
+  const LIVE_BRIDGES = BRIDGES.filter(([a,b]) => {
+    const p = PROTEINS[a], q = PROTEINS[b];
+    if (p.comp !== q.comp) return false;
+    if (p.comp === "c"){                       // must not cross the nucleus
+      for (let t=0.1; t<1; t+=0.1){
+        const mx = p.x + (q.x-p.x)*t, my = p.y + (q.y-p.y)*t;
+        if (Math.hypot((mx-NUC.cx)/NUC.rx, (my-NUC.cy)/NUC.ry) < 1) return false;
+      }
+    }
+    return true;
+  });
+  L.bridgeNodes = LIVE_BRIDGES.map(([a,b]) => {
+    const p = PROTEINS[a], q = PROTEINS[b];
+    const line = el("line", {x1:p.x, y1:p.y, x2:q.x, y2:q.y,
+      stroke:"#f0b429", "stroke-width":2.4, "stroke-linecap":"round", opacity:0}, L.bridges);
+    const len = Math.hypot(q.x-p.x, q.y-p.y);
+    line.setAttribute("stroke-dasharray", len);
+    line.setAttribute("stroke-dashoffset", len);
+    return {line, len};
+  });
+
+  // proteins (antigens)
+  L.proteins = g(L.main, "proteins");
+  L.protNodes = PROTEINS.map((p,i) => {
+    const grp = g(L.proteins);
+    const NUCC = "#b9a2ec", CYTC = "#e79ac9";
+    const body = el("circle", {cx:p.x, cy:p.y, r:p.r,
+      fill: p.comp === "n" ? NUCC : CYTC,
+      stroke: i===TARGET ? "#ffffff" : "none",
+      "stroke-width": i===TARGET ? 1.6 : 0,
+      opacity: i===TARGET ? 1 : .9}, grp);
+    el("circle", {cx:p.x - p.r*.32, cy:p.y - p.r*.34, r:p.r*.34,
+      fill:"#ffffff", opacity:.16}, grp);
+    // free aldehyde stub
+    const ald = el("circle", {cx:p.x + p.r*.78, cy:p.y - p.r*.7, r:3.4,
+      fill:"#ff8a3d", opacity:0}, grp);
+    // free thiol stub
+    const thi = el("circle", {cx:p.x - p.r*.85, cy:p.y - p.r*.55, r:3.4,
+      fill:"#f5d76e", opacity:0}, grp);
+    return {grp, body, ald, thi, p, seed:Math.random()*6.28};
+  });
+  L.protNodes[TARGET].ring = el("circle", {cx:PROTEINS[TARGET].x, cy:PROTEINS[TARGET].y,
+    r:PROTEINS[TARGET].r+7, fill:"none", stroke:"#b9a2ec", "stroke-width":1.4,
+    "stroke-dasharray":"3 4", opacity:0}, L.proteins);
+
+  // reagent particle field (reused by several steps)
+  L.particles = g(L.main, "particles");
+  L.parts = [];
+  for (let i=0;i<34;i++){
+    const n = g(L.particles);
+    L.parts.push({node:n, x:0, y:0, vx:0, vy:0, on:false});
+  }
+
+  // antibody stack in main view (small, indicative)
+  L.abMain = g(L.main, "abMain");
+
+  // substrate: glass + coating — drawn after the cell so it reads as the floor
+  const sub = g(L.view, "substrate");
+  el("rect", {x:10, y:GLASS_Y, width:518, height:60, fill:"#081620"}, sub);
+  el("line", {x1:10, y1:GLASS_Y, x2:528, y2:GLASS_Y, stroke:"#3d6f8a", "stroke-width":2}, sub);
+  for (let x=18; x<524; x+=13){
+    el("circle", {cx:x, cy:GLASS_Y+7, r:2.7, fill:"#2f6b8a", opacity:.8}, sub);
+  }
+  txt(sub, 18, GLASS_Y+32, "Coated glass  ·  poly-D-lysine", "lbl-sm");
+
+  // leader lines to the inset
+  L.leaders = g(svg, "leaders");
+  const tp = L.toView(PROTEINS[TARGET].x, PROTEINS[TARGET].y);
+  el("line", {x1:tp.x+18, y1:tp.y-16, x2:INSET.cx-INSET.r+16, y2:INSET.cy-92,
+    stroke:"#3d6f8a", "stroke-width":1, "stroke-dasharray":"3 4", opacity:.6}, L.leaders);
+  el("line", {x1:tp.x+18, y1:tp.y+18, x2:INSET.cx-INSET.r+16, y2:INSET.cy+92,
+    stroke:"#3d6f8a", "stroke-width":1, "stroke-dasharray":"3 4", opacity:.6}, L.leaders);
+
+  // ---- inset -------------------------------------------
+  L.insetWrap = g(svg, "insetWrap");
+  el("circle", {cx:INSET.cx, cy:INSET.cy, r:INSET.r, fill:"#0a1b26",
+    stroke:"#3d6f8a", "stroke-width":1.4, opacity:.98}, L.insetWrap);
+  L.inset = el("g", {"clip-path":"url(#clipInset)"}, L.insetWrap);
+  L.insetTitle = txt(L.insetWrap, INSET.cx, INSET.cy - INSET.r + 24, "", "lbl-b", "middle");
+  L.insetTitle.setAttribute("font-size","12");
+
+  // scenes inside the inset — one group per step, toggled
+  L.sc = {};
+  ["fix","perm","block","ab1","ab2","image","elute","iter","analyze","live"]
+    .forEach(k => { L.sc[k] = g(L.inset, "sc-"+k); L.sc[k].setAttribute("opacity","0"); });
+
+  // each scene was laid out for a smaller circle; centre and scale it
+  const FIT = { live:[-4,0.94], fix:[6,1.10], perm:[-4,1.08], block:[4,1.06],
+                ab1:[-22,1.10], ab2:[-30,1.06], image:[-10,1.10],
+                elute:[30,1.00], iter:[0,1.06], analyze:[-8,1.10] };
+  Object.keys(FIT).forEach(k => {
+    const [dy, sc] = FIT[k];
+    L.sc[k].setAttribute("transform",
+      `translate(${INSET.cx},${INSET.cy + dy}) scale(${sc}) translate(${-INSET.cx},${-INSET.cy})`);
+  });
+
+  buildInsetLive();
+  buildInsetFix();
+  buildInsetPerm();
+  buildInsetBlock();
+  buildInsetAb1();
+  buildInsetAb2();
+  buildInsetImage();
+  buildInsetElute();
+  buildInsetIter();
+  buildInsetAnalyze();
+}
+
+/* ---------- inset: live cell ---------- */
+function buildInsetLive(){
+  const s = L.sc.live, cx = INSET.cx, cy = INSET.cy;
+  L.liveProts = [];
+
+  // the envelope, dividing the field into the two compartments
+  el("path", {d:`M ${cx-60} ${cy-150} C ${cx-16} ${cy-70} ${cx-16} ${cy+40} ${cx-70} ${cy+140}`,
+    fill:"none", stroke:"#7fc0dd", "stroke-width":2.4, opacity:.85}, s);
+  el("path", {d:`M ${cx-52} ${cy-150} C ${cx-8} ${cy-70} ${cx-8} ${cy+40} ${cx-62} ${cy+140}`,
+    fill:"none", stroke:"#5a9ec0", "stroke-width":2.4, opacity:.85}, s);
+  [-96,-30,42].forEach(dy => {
+    el("circle", {cx:cx-32, cy:cy+dy, r:6.5, fill:"#0a1b26",
+      stroke:"#8fd0ec", "stroke-width":2}, s);
+  });
+  const pl = txt(s, cx-116, cy-124, "nuclear", "lbl", "middle");
+  pl.setAttribute("fill", "#b9a2ec");
+  const pl2 = txt(s, cx-116, cy-108, "envelope", "lbl", "middle");
+  pl2.setAttribute("fill", "#7fc0dd");
+
+  // nuclear side (left), cytoplasmic side (right)
+  const pts = [[-112,-46,"n"],[-88,20,"n"],[-110,80,"n"],
+               [26,-96,"c"],[92,-40,"c"],[36,-16,"c"],
+               [104,42,"c"],[34,72,"c"],[96,116,"c"]];
+  pts.forEach(([dx,dy,comp]) => {
+    const c = el("circle", {cx:cx+dx, cy:cy+dy, r:14,
+      fill: comp==="n" ? "#b9a2ec" : "#e79ac9", opacity:.92}, s);
+    L.liveProts.push({node:c, x:cx+dx, y:cy+dy, seed:Math.random()*6.28});
+  });
+  txt(s, cx, cy+158, "Both pools diffuse freely. Nothing is anchored.", "lbl", "middle");
+}
+
+/* ---------- inset: fixation chemistry ---------- */
+function buildInsetFix(){
+  const s = L.sc.fix, cx = INSET.cx, cy = INSET.cy - 14;
+
+  // two lysine side chains reaching toward each other
+  const leftK  = el("path", {d:`M ${cx-128} ${cy+58} L ${cx-104} ${cy+30} L ${cx-84} ${cy+40} L ${cx-62} ${cy+12}`,
+    fill:"none", stroke:"#9fc4d6", "stroke-width":2, "stroke-linejoin":"round"}, s);
+  const rightK = el("path", {d:`M ${cx+128} ${cy+58} L ${cx+104} ${cy+30} L ${cx+84} ${cy+40} L ${cx+62} ${cy+12}`,
+    fill:"none", stroke:"#9fc4d6", "stroke-width":2, "stroke-linejoin":"round"}, s);
+  txt(s, cx-120, cy+78, "Lys", "lbl", "middle");
+  txt(s, cx+120, cy+78, "Lys", "lbl", "middle");
+  txt(s, cx-56, cy+8,  "NH₂", "lbl-b", "end").setAttribute("font-size","12");
+  txt(s, cx+56, cy+8,  "H₂N", "lbl-b", "start").setAttribute("font-size","12");
+
+  // incoming formaldehyde
+  L.fixCH2O = g(s);
+  txt(L.fixCH2O, cx, cy-72, "CH₂O", "lbl-b", "middle").setAttribute("font-size","13");
+  txt(L.fixCH2O, cx, cy-56, "formaldehyde", "lbl-sm", "middle");
+
+  // the methylene bridge that forms
+  L.fixBridge = g(s);
+  L.fixBridge.setAttribute("opacity","0");
+  el("path", {d:`M ${cx-52} ${cy+2} L ${cx-18} ${cy-16} L ${cx+18} ${cy-16} L ${cx+52} ${cy+2}`,
+    fill:"none", stroke:"#f0b429", "stroke-width":3, "stroke-linejoin":"round",
+    "stroke-linecap":"round"}, L.fixBridge);
+  txt(L.fixBridge, cx, cy-28, "—CH₂—", "lbl-b", "middle").setAttribute("font-size","12.5");
+  const cap = txt(L.fixBridge, cx, cy+52, "covalent methylene bridge", "lbl", "middle");
+  cap.setAttribute("fill","#f0b429");
+
+  // leftover aldehyde
+  L.fixAld = g(s);
+  L.fixAld.setAttribute("opacity","0");
+  el("circle", {cx:cx-104, cy:cy-58, r:5, fill:"#ff8a3d"}, L.fixAld);
+  el("circle", {cx:cx+112, cy:cy-40, r:5, fill:"#ff8a3d"}, L.fixAld);
+  const a2 = txt(L.fixAld, cx, cy+120, "…and unreacted aldehyde is left behind", "lbl", "middle");
+  a2.setAttribute("fill","#ff8a3d");
+}
+
+/* ---------- inset: permeabilization ---------- */
+function buildInsetPerm(){
+  const s = L.sc.perm, cx = INSET.cx, cy = INSET.cy;
+
+  // a patch of bilayer
+  L.permBi = g(s);
+  for (let i=0;i<11;i++){
+    const x = cx - 120 + i*24;
+    el("circle", {cx:x, cy:cy-26, r:6.4, fill:"#7fb8d4"}, L.permBi);
+    el("circle", {cx:x, cy:cy+26, r:6.4, fill:"#5d95b2"}, L.permBi);
+    el("line", {x1:x, y1:cy-19, x2:x, y2:cy-4, stroke:"#4e7f99", "stroke-width":1.8}, L.permBi);
+    el("line", {x1:x, y1:cy+19, x2:x, y2:cy+4, stroke:"#4e7f99", "stroke-width":1.8}, L.permBi);
+  }
+  // triton micelle
+  L.permMic = g(s);
+  L.permMic.setAttribute("opacity","0");
+  el("circle", {cx:cx+4, cy:cy, r:34, fill:"#2f6b8a", opacity:.5}, L.permMic);
+  for (let i=0;i<12;i++){
+    const a = i/12*6.283;
+    el("circle", {cx:cx+4+Math.cos(a)*34, cy:cy+Math.sin(a)*34, r:5, fill:"#9fd4ea"}, L.permMic);
+  }
+  txt(L.permMic, cx+4, cy+4, "TX-100", "lbl-sm", "middle");
+
+  // IgG entering through the hole
+  L.permIgG = g(s);
+  L.permIgG.setAttribute("opacity","0");
+  drawIgG(L.permIgG, cx+4, cy-96, 0.66, "#9fc4d6", null);
+
+  txt(s, cx, cy+112, "0.1% Triton X-100 lifts lipids into mixed micelles", "lbl", "middle");
+  txt(s, cx, cy+130, "A 150 kDa IgG can now reach the inside.", "lbl-sm", "middle");
+}
+
+/* ---------- inset: blocking ---------- */
+function buildInsetBlock(){
+  const s = L.sc.block, cx = INSET.cx, cy = INSET.cy;
+
+  // left half: aldehyde + NH4Cl
+  txt(s, cx-88, cy-104, "free aldehyde", "lbl", "middle");
+  L.blkAld = el("circle", {cx:cx-88, cy:cy-62, r:11, fill:"#ff8a3d"}, s);
+  L.blkNH4 = txt(s, cx-88, cy-14, "NH₄Cl", "lbl-b", "middle");
+  L.blkNH4.setAttribute("font-size","12.5");
+  L.blkAldOut = txt(s, cx-88, cy+22, "quenched", "lbl", "middle");
+  L.blkAldOut.setAttribute("opacity","0");
+  L.blkAldOut.setAttribute("fill","#7fa3b6");
+
+  // divider
+  el("line", {x1:cx, y1:cy-116, x2:cx, y2:cy+64, stroke:"#2a4f66", "stroke-width":1}, s);
+
+  // right half: thiol + maleimide
+  txt(s, cx+88, cy-104, "free thiol (–SH)", "lbl", "middle");
+  L.blkThi = el("circle", {cx:cx+88, cy:cy-62, r:11, fill:"#f5d76e"}, s);
+  L.blkMal = txt(s, cx+88, cy-14, "maleimide", "lbl-b", "middle");
+  L.blkMal.setAttribute("font-size","12.5");
+  L.blkThiOut = txt(s, cx+88, cy+22, "capped — thioether", "lbl", "middle");
+  L.blkThiOut.setAttribute("opacity","0");
+  L.blkThiOut.setAttribute("fill","#7fa3b6");
+
+  const n = txt(s, cx, cy+108, "Both are quenchers, not blockers.", "lbl", "middle");
+  txt(s, cx, cy+126, "They consume reactive groups so nothing", "lbl-sm", "middle");
+  txt(s, cx, cy+142, "captures your antibody permanently.", "lbl-sm", "middle");
+}
+
+/* ---------- IgG drawing helper ---------- */
+function drawIgG(parent, x, y, sc, color, fluor, id){
+  const grp = el("g", {transform:`translate(${x},${y}) scale(${sc})`}, parent);
+  const w = 2.9*(1/sc>1?1:1);
+  // Fc stem
+  el("line", {x1:0, y1:0, x2:0, y2:34, stroke:color, "stroke-width":6, "stroke-linecap":"round"}, grp);
+  // Fab arms
+  el("line", {x1:0, y1:0, x2:-30, y2:-34, stroke:color, "stroke-width":6, "stroke-linecap":"round"}, grp);
+  el("line", {x1:0, y1:0, x2: 30, y2:-34, stroke:color, "stroke-width":6, "stroke-linecap":"round"}, grp);
+  // light chains
+  el("line", {x1:-16, y1:-18, x2:-38, y2:-8, stroke:color, "stroke-width":4.5, "stroke-linecap":"round"}, grp);
+  el("line", {x1: 16, y1:-18, x2: 38, y2:-8, stroke:color, "stroke-width":4.5, "stroke-linecap":"round"}, grp);
+  // hinge disulfides
+  const ds = g(grp);
+  el("line", {x1:-6, y1:8, x2:6, y2:8, stroke:"#f5d76e", "stroke-width":3}, ds);
+  el("line", {x1:-6, y1:16, x2:6, y2:16, stroke:"#f5d76e", "stroke-width":3}, ds);
+  if (fluor){
+    el("circle", {cx:0, cy:40, r:8, fill:fluor, filter:"url(#glow)"}, grp);
+  }
+  if (id) grp.setAttribute("id", id);
+  return {grp, ds};
+}
+
+/* ---------- inset: primary antibody ---------- */
+function buildInsetAb1(){
+  const s = L.sc.ab1, cx = INSET.cx, cy = INSET.cy;
+
+  // antigen surface at the bottom
+  el("path", {d:`M ${cx-150} ${cy+92} Q ${cx} ${cy+34} ${cx+150} ${cy+92} L ${cx+150} ${cy+150} L ${cx-150} ${cy+150} Z`,
+    fill:"#8b79c4", opacity:.92}, s);
+  txt(s, cx, cy+124, "antigen — epitope surface", "lbl", "middle").setAttribute("fill","#e0d6f8");
+
+  // IgG above, arms down
+  const ab = el("g", {transform:`translate(${cx},${cy-20}) rotate(180) scale(1.05)`}, s);
+  el("line", {x1:0, y1:0, x2:0, y2:38, stroke:"#35bfa8", "stroke-width":7, "stroke-linecap":"round"}, ab);
+  el("line", {x1:0, y1:0, x2:-40, y2:-46, stroke:"#35bfa8", "stroke-width":7, "stroke-linecap":"round"}, ab);
+  el("line", {x1:0, y1:0, x2: 40, y2:-46, stroke:"#35bfa8", "stroke-width":7, "stroke-linecap":"round"}, ab);
+  txt(s, cx+98, cy-46, "1° IgG", "lbl-b", "middle").setAttribute("fill","#35bfa8");
+
+  // the three interaction classes at the interface
+  L.ab1Bonds = {};
+  // H-bonds (cyan dashed)
+  L.ab1Bonds.h = g(s);
+  [[-46,-2],[-18,-14],[14,-14]].forEach(([dx,dy]) => {
+    el("line", {x1:cx+dx, y1:cy+30, x2:cx+dx+3, y2:cy+62+dy,
+      stroke:"#4fc3e8", "stroke-width":2.2, "stroke-dasharray":"4 3",
+      "stroke-linecap":"round"}, L.ab1Bonds.h);
+  });
+  // hydrophobic (grey dotted)
+  L.ab1Bonds.p = g(s);
+  [[-32,0],[0,-8],[30,-6]].forEach(([dx,dy]) => {
+    el("line", {x1:cx+dx, y1:cy+34, x2:cx+dx, y2:cy+64+dy,
+      stroke:"#8296a6", "stroke-width":2.4, "stroke-dasharray":"1.5 4",
+      "stroke-linecap":"round"}, L.ab1Bonds.p);
+  });
+  // salt bridge (red)
+  L.ab1Bonds.s = g(s);
+  [[46,0],[-58,4]].forEach(([dx,dy]) => {
+    el("line", {x1:cx+dx, y1:cy+30, x2:cx+dx-2, y2:cy+62+dy,
+      stroke:"#f2685b", "stroke-width":2.6, "stroke-linecap":"round"}, L.ab1Bonds.s);
+    const pp = txt(L.ab1Bonds.s, cx+dx+(dx>0?9:-9), cy+30, "+", "lbl", "middle");
+    pp.setAttribute("fill","#f2685b"); pp.setAttribute("font-size","10");
+    const mm = txt(L.ab1Bonds.s, cx+dx-(dx>0?11:-11), cy+62, "−", "lbl", "middle");
+    mm.setAttribute("fill","#f2685b"); mm.setAttribute("font-size","10");
+  });
+
+}
+
+/* ---------- inset: secondary antibody ---------- */
+function buildInsetAb2(){
+  const s = L.sc.ab2, cx = INSET.cx, cy = INSET.cy;
+  el("path", {d:`M ${cx-150} ${cy+104} Q ${cx} ${cy+56} ${cx+150} ${cy+104} L ${cx+150} ${cy+160} L ${cx-150} ${cy+160} Z`,
+    fill:"#8b79c4", opacity:.92}, s);
+
+  // primary
+  const ab = el("g", {transform:`translate(${cx},${cy+6}) rotate(180) scale(.92)`}, s);
+  el("line", {x1:0, y1:0, x2:0, y2:38, stroke:"#35bfa8", "stroke-width":7, "stroke-linecap":"round"}, ab);
+  el("line", {x1:0, y1:0, x2:-34, y2:-38, stroke:"#35bfa8", "stroke-width":7, "stroke-linecap":"round"}, ab);
+  el("line", {x1:0, y1:0, x2: 34, y2:-38, stroke:"#35bfa8", "stroke-width":7, "stroke-linecap":"round"}, ab);
+
+  // three secondaries on the primary's Fc
+  L.ab2Nodes = [];
+  [[-72,-58],[0,-84],[72,-58]].forEach(([dx,dy]) => {
+    const o = drawIgG(s, cx+dx, cy+dy, .72, "#c6d2da", "#f2685b");
+    o.grp.setAttribute("opacity","0");
+    L.ab2Nodes.push(o.grp);
+  });
+  txt(s, cx, cy+134, "One primary, several labelled secondaries", "lbl", "middle");
+  txt(s, cx, cy+152, "3–10× signal amplification", "lbl-sm", "middle");
+}
+
+/* ---------- inset: imaging ---------- */
+function buildInsetImage(){
+  const s = L.sc.image, cx = INSET.cx, cy = INSET.cy;
+  L.imgFluor = el("circle", {cx:cx, cy:cy-4, r:17, fill:"#f2685b", filter:"url(#glow)"}, s);
+  // excitation
+  L.imgEx = el("path", {d:`M ${cx-140} ${cy-96} L ${cx-24} ${cy-16}`,
+    stroke:"#6fd8ff", "stroke-width":3, "stroke-linecap":"round", opacity:.9}, s);
+  L.imgEm = el("g", null, s);
+  for (let i=0;i<7;i++){
+    const a = -1.1 + i*0.32;
+    el("line", {x1:cx+Math.cos(a)*24, y1:cy-4+Math.sin(a)*24,
+      x2:cx+Math.cos(a)*66, y2:cy-4+Math.sin(a)*66,
+      stroke:"#ffb3aa", "stroke-width":2, "stroke-linecap":"round", opacity:.75}, L.imgEm);
+  }
+  // ROS + NAC
+  L.imgROS = g(s);
+  [[-64,52],[52,60],[-8,86]].forEach(([dx,dy]) => {
+    el("circle", {cx:cx+dx, cy:cy+dy, r:5, fill:"#ff6b4a"}, L.imgROS);
+  });
+  txt(L.imgROS, cx+96, cy+52, "ROS", "lbl").setAttribute("fill","#ff6b4a");
+  L.imgNAC = g(s);
+  L.imgNAC.setAttribute("opacity","0");
+  [[-64,52],[52,60],[-8,86]].forEach(([dx,dy]) => {
+    el("circle", {cx:cx+dx, cy:cy+dy, r:12, fill:"#35bfa8", opacity:.45}, L.imgNAC);
+  });
+  txt(s, cx, cy+126, "Radicals from the laser would weld the antibody", "lbl", "middle");
+  txt(s, cx, cy+144, "onto its epitope. 0.7 M NAC scavenges them.", "lbl-sm", "middle");
+}
+
+/* ---------- inset: ELUTION (the hero) ---------- */
+function buildInsetElute(){
+  const s = L.sc.elute, cx = INSET.cx, cy = INSET.cy;
+
+  // antigen surface (stays)
+  el("path", {d:`M ${cx-150} ${cy+92} Q ${cx} ${cy+34} ${cx+150} ${cy+92} L ${cx+150} ${cy+150} L ${cx-150} ${cy+150} Z`,
+    fill:"#8b79c4", opacity:.92}, s);
+  // amber methylene bridges anchoring the antigen — these never move
+  L.eluteBridges = g(s);
+  [[-118,110],[-58,96],[8,90],[74,96],[128,112]].forEach(([dx,dy]) => {
+    el("line", {x1:cx+dx-22, y1:cy+dy, x2:cx+dx+22, y2:cy+dy-6,
+      stroke:"#f0b429", "stroke-width":3.4, "stroke-linecap":"round"}, L.eluteBridges);
+  });
+
+  // the antibody — split into pieces so TCEP can dismantle it
+  L.eluteAb = g(s);
+  L.abFabL = el("line", {x1:cx, y1:cy-20, x2:cx-34, y2:cy+18,
+    stroke:"#35bfa8", "stroke-width":7, "stroke-linecap":"round"}, L.eluteAb);
+  L.abFabR = el("line", {x1:cx, y1:cy-20, x2:cx+34, y2:cy+18,
+    stroke:"#35bfa8", "stroke-width":7, "stroke-linecap":"round"}, L.eluteAb);
+  L.abFc   = el("line", {x1:cx, y1:cy-20, x2:cx, y2:cy-58,
+    stroke:"#35bfa8", "stroke-width":7, "stroke-linecap":"round"}, L.eluteAb);
+  L.abDs   = g(L.eluteAb);
+  el("line", {x1:cx-7, y1:cy-38, x2:cx+7, y2:cy-38, stroke:"#f5d76e", "stroke-width":3.4}, L.abDs);
+  el("line", {x1:cx-7, y1:cy-29, x2:cx+7, y2:cy-29, stroke:"#f5d76e", "stroke-width":3.4}, L.abDs);
+
+  // interface bonds, three classes, individually removable
+  L.elBondH = g(s); L.elBondP = g(s); L.elBondS = g(s);
+  [[-42,0],[-14,-4],[16,-2]].forEach(([dx,dy]) => {
+    el("line", {x1:cx+dx, y1:cy+22, x2:cx+dx+3, y2:cy+56+dy,
+      stroke:"#4fc3e8", "stroke-width":2.2, "stroke-dasharray":"4 3", "stroke-linecap":"round"}, L.elBondH);
+  });
+  [[-28,0],[2,-6],[28,-4]].forEach(([dx,dy]) => {
+    el("line", {x1:cx+dx, y1:cy+26, x2:cx+dx, y2:cy+58+dy,
+      stroke:"#8296a6", "stroke-width":2.4, "stroke-dasharray":"1.5 4", "stroke-linecap":"round"}, L.elBondP);
+  });
+  [[44,0],[-54,2]].forEach(([dx,dy]) => {
+    el("line", {x1:cx+dx, y1:cy+22, x2:cx+dx-2, y2:cy+56+dy,
+      stroke:"#f2685b", "stroke-width":2.6, "stroke-linecap":"round"}, L.elBondS);
+  });
+
+  // verdict readout — pinned to the frame, not the scaled scene
+  L.elVerdict = txt(L.insetWrap, INSET.cx, INSET.cy - INSET.r + 48, "", "lbl-b", "middle");
+  L.elVerdict.setAttribute("font-size","13");
+  L.elSub = txt(L.insetWrap, INSET.cx, INSET.cy - INSET.r + 66, "", "lbl-sm", "middle");
+}
+
+/* ---------- inset: iteration ---------- */
+function buildInsetIter(){
+  const s = L.sc.iter, cx = INSET.cx, cy = INSET.cy;
+  L.iterStack = g(s);
+  txt(s, cx, cy+132, "Same cells. Same coordinates. New antibodies.", "lbl", "middle");
+}
+function paintIterStack(){
+  if (!L.iterStack) return;
+  L.iterStack.innerHTML = "";
+  const cx = INSET.cx, cy = INSET.cy;
+  const cols = ["#4ade9b","#6fa8ff","#ff9d5c","#ffe066","#c99bff","#5ad2d2",
+                "#ff7ba8","#8de06f","#9fb4ff","#ffc46b","#7ee0c8","#e08ff0"];
+  const n = Math.min(S.round, 12);
+  for (let i=0;i<n;i++){
+    const off = (n-1-i)*11;
+    el("rect", {x:cx-96+off, y:cy-88+off, width:150, height:112, rx:5,
+      fill:"#0d2331", stroke:cols[i], "stroke-width":1.6, opacity: .35 + .65*(i/(n-1||1))}, L.iterStack);
+    if (i===n-1){
+      for (let k=0;k<16;k++){
+        el("circle", {cx: cx-84+off+Math.random()*126, cy: cy-76+off+Math.random()*88,
+          r: 2.6+Math.random()*3, fill: cols[i], opacity:.85}, L.iterStack);
+      }
+      const t = txt(L.iterStack, cx-88+off, cy+18+off, MARKERS[i]||("m"+i), "lbl-b");
+      t.setAttribute("fill", cols[i]); t.setAttribute("font-size","12");
+    }
+  }
+}
+
+/* ---------- inset: analysis ---------- */
+function buildInsetAnalyze(){
+  const s = L.sc.analyze, cx = INSET.cx, cy = INSET.cy;
+  // axes
+  el("line", {x1:cx-108, y1:cy+70, x2:cx+112, y2:cy+70, stroke:"#3d6f8a", "stroke-width":1.2}, s);
+  el("line", {x1:cx-108, y1:cy+70, x2:cx-108, y2:cy-90, stroke:"#3d6f8a", "stroke-width":1.2}, s);
+  txt(s, cx+4, cy+92, "CDK4 / cyclin D1", "lbl-sm", "middle");
+  const yl = txt(s, 0, 0, "pRB / RB", "lbl-sm", "middle");
+  yl.setAttribute("transform", `translate(${cx-124},${cy-10}) rotate(-90)`);
+  // two clusters: cycling vs arrested
+  for (let i=0;i<52;i++){
+    const t = Math.random();
+    el("circle", {cx: cx-84 + t*40 + Math.random()*26, cy: cy+52 - t*22 + Math.random()*20,
+      r:3.1, fill:"#6fa8ff", opacity:.8}, s);
+  }
+  for (let i=0;i<44;i++){
+    const t = Math.random();
+    el("circle", {cx: cx+2 + t*82 + Math.random()*16, cy: cy-4 - t*66 + Math.random()*22,
+      r:3.1, fill:"#4ade9b", opacity:.85}, s);
+  }
+  txt(s, cx-64, cy+80, "arrested", "lbl").setAttribute("fill","#6fa8ff");
+  txt(s, cx+62, cy-84, "cycling", "lbl").setAttribute("fill","#4ade9b");
+  txt(s, cx, cy+126, "Every dot is one cell measured 12 times.", "lbl", "middle");
+}
+
+/* ============================================================
+   Step definitions
+   ============================================================ */
+const STEPS = [
+  {
+    key:"live", name:"Live cell", sub:"Before anything",
+    t1:"Live cell", t2:"Adhered cell in cross-section — nucleus and cytoplasm",
+    insetTitle:"Across the nuclear envelope",
+    eyebrow:"Starting material",
+    head:"Nothing is holding anything in place",
+    lede:"Cells are plated on a coated 96-well glass-bottom plate and treated. Every protein is diffusing freely — nuclear ones inside the envelope, cytoplasmic ones outside it — and both membranes are intact and impermeable to antibody.",
+    more:"Density is the variable that matters most here. Too sparse and cells wash off over twenty rounds; confluent and the segmentation step at the end can't separate them.",
+    ledger:[],
+    apply(){
+      set("membrane",1); set("fixed",0); set("perm",0); set("aldQ",0);
+      set("thiolsOn",0); set("thiolCap",0); set("ab1",0); set("ab2",0); set("glow",0);
+      set("chao",0); set("acid",0); set("tcep",0);
+    },
+    legend:[["nucp","Nuclear protein"],["cytp","Cytoplasmic protein"],["lipid","Plasma membrane"],["nucenv","Nuclear envelope · pore"]]
+  },
+  {
+    key:"fix", name:"Fixation", sub:"4% PFA, 30 min",
+    t1:"Fixation", t2:"Formaldehyde crosslinks the whole cell into one network",
+    insetTitle:"Methylene bridge formation",
+    eyebrow:"Step 1 · 4% paraformaldehyde",
+    head:"This is the step that makes 4i possible",
+    lede:"Formaldehyde attacks nucleophilic side chains — lysine above all — and forms a covalent —CH₂— bridge between two nearby proteins. Every protein in the cell becomes a node in one crosslinked network.",
+    more:"The bridge spans only 2–3 Å, so it joins molecules that were already touching. That's why fine subcellular structure survives, and it's why 4i can make claims about where a protein sits inside a cell.",
+    chem: 'Protein–NH₂ + CH₂O\n  → Protein–NH–CH₂OH\n  → Protein–N=CH₂    (Schiff base)\n  + H₂N–Protein′\n  → Protein–NH–<span class="hl">CH₂</span>–NH–Protein′',
+    ledger:[
+      ["make","Methylene bridges","Covalent C–N. Not reversible under any buffer you will use."],
+      ["make","Free aldehyde groups","Unwanted. Some CH₂O never finds a second partner."],
+      ["make","Compartments locked","Bridges span 2–3 Å, so nothing crosslinks across the envelope. A nuclear protein stays nuclear."]
+    ],
+    callout:"Your antigens are now welded into the specimen. Everything that follows depends on this and only this.",
+    apply(){
+      set("membrane",1); set("fixed",1); set("perm",0); set("aldQ",0);
+      set("ab1",0); set("ab2",0); set("glow",0);
+    },
+    legend:[["amber","Covalent methylene bridge"],["orange","Unreacted aldehyde"],["nucp","Nuclear protein"],["cytp","Cytoplasmic protein"]]
+  },
+  {
+    key:"perm", name:"Permeabilization", sub:"0.1% Triton X-100",
+    t1:"Permeabilization", t2:"Both membranes open — plasma and nuclear envelope",
+    insetTitle:"Triton X-100 on the bilayer",
+    eyebrow:"Step 2 · 0.1% Triton X-100, 15 min",
+    head:"Opening the cell without moving anything",
+    lede:"PFA crosslinks protein; it leaves the lipid bilayer intact. Triton X-100 sits far above its critical micelle concentration at 0.1% and pulls membrane lipids into mixed micelles, leaving the crosslinked protein scaffold behind.",
+    more:"Triton opens the nuclear envelope as well as the plasma membrane, which is what makes nuclear antigens — Ki67, pRB, cyclin B, p21 — reachable at all. A surface-only permeabilisation would give you cytoplasmic staining and an empty nucleus.",
+    ledger:[
+      ["brk","Lipid–lipid packing","Both bilayers dissolved into micelles. No protein bonds touched."]
+    ],
+    callout:"Triton isn't selective — it strips membrane proteins too. For a membrane antigen, saponin is the gentler choice.",
+    apply(){
+      set("membrane",0); set("fixed",1); set("perm",1); set("aldQ",0);
+      set("ab1",0); set("ab2",0); set("glow",0);
+    },
+    legend:[["lipid","Plasma membrane"],["nucenv","Nuclear envelope"],["cyan","Detergent micelle"]]
+  },
+  {
+    key:"block", name:"Blocking", sub:"sBS — maleimide + NH₄Cl",
+    t1:"Blocking", t2:"Quenching the groups that would trap antibody permanently",
+    insetTitle:"Two quenchers, two targets",
+    eyebrow:"Step 3 · staining blocking solution",
+    head:"The chemistry that is unique to 4i",
+    lede:"sBS is 100 mM maleimide and 100 mM ammonium chloride in 1% BSA. Neither is really blocking. Both are consuming reactive groups that would otherwise capture antibody covalently — and covalently captured antibody never elutes.",
+    more:"Ammonium chloride quenches leftover aldehydes from fixation. Maleimide caps free thiols by Michael addition, forming a stable thioether. Skip either and a few percent of every round's signal becomes permanent background that compounds across twenty cycles.",
+    chem: '–SH  + maleimide  →  –S–succinimidyl\n–CHO + NH₃        →  non-reactive',
+    ledger:[
+      ["make","Thioether caps","Maleimide + –SH. Irreversible, and that's the point."],
+      ["brk","Aldehyde reactivity","NH₄Cl consumes what fixation left dangling."]
+    ],
+    callout:"Maleimide hydrolyses in water with a half-life of tens of minutes. An sBS made an hour early is measurably weaker — this is the real reason for \u201cprepare immediately before use.\u201d",
+    apply(){
+      set("membrane",0); set("fixed",1); set("perm",1); set("aldQ",1);
+      set("thiolCap",1); set("ab1",0); set("ab2",0); set("glow",0);
+    },
+    legend:[["orange","Free aldehyde"],["thiol","Free thiol"],["quench","Quenched"]]
+  },
+  {
+    key:"ab1", name:"Primary antibody", sub:"overnight, 4 °C",
+    t1:"Primary antibody", t2:"Binding by affinity alone",
+    insetTitle:"The antibody–epitope interface",
+    eyebrow:"Step 4 · 1° antibody in cBS, overnight",
+    head:"Nothing covalent forms here",
+    lede:"The antibody is held to its epitope by hydrogen bonds, shape-complementary van der Waals contact, the hydrophobic effect, and a small number of salt bridges. Nanomolar affinity — very tight, and every single interaction is breakable by changing the solvent.",
+    more:"The antibody arrives after fixation, so it never gets crosslinked into the specimen. That asymmetry — covalent antigen, non-covalent antibody — is the entire basis of the method.",
+    ledger:[
+      ["make","Hydrogen bonds","Directional, and water can compete for them."],
+      ["make","Hydrophobic contact","Entropic. Often the largest single term."],
+      ["make","Salt bridges","Charged pairs. pH-sensitive."]
+    ],
+    callout:"Because you strip everything between rounds, two rabbit primaries can run in different rounds with zero crosstalk. 4i removes the host-species constraint entirely.",
+    apply(){
+      set("membrane",0); set("fixed",1); set("perm",1); set("aldQ",1);
+      set("ab1",1); set("ab2",0); set("glow",0);
+      set("chao",0); set("acid",0); set("tcep",0);
+    },
+    legend:[["cyan","Hydrogen bond"],["slate","Hydrophobic contact"],["rose","Salt bridge"]]
+  },
+  {
+    key:"ab2", name:"Secondary antibody", sub:"1:500, 1 h RT",
+    t1:"Secondary antibody", t2:"Labelled anti-species IgG amplifies the signal",
+    insetTitle:"Indirect detection",
+    eyebrow:"Step 5 · 2° antibody, 1 h at RT",
+    head:"Several labels for every one target",
+    lede:"The secondary is polyclonal against the primary's constant regions, so several labelled IgGs decorate each bound primary. That's a 3–10× gain, which is what makes low-abundance targets detectable.",
+    more:"Spin secondaries at 10,000 g for 5 min before use. Freeze-thaw aggregates are bright, non-specific, and they stick permanently.",
+    ledger:[
+      ["make","2° to 1° binding","Also entirely non-covalent — it elutes with everything else."]
+    ],
+    apply(){
+      set("membrane",0); set("fixed",1); set("perm",1); set("aldQ",1);
+      set("ab1",1); set("ab2",1); set("glow",0);
+    },
+    legend:[["mint","Primary IgG"],["rose","Fluorophore"],["disulf","Disulfide"]]
+  },
+  {
+    key:"image", name:"Imaging", sub:"0.7 M NAC buffer",
+    t1:"Imaging", t2:"Scavenging the radicals that would make the antibody permanent",
+    insetTitle:"Why imaging needs a radical scavenger",
+    eyebrow:"Step 6 · imaging buffer, fresh",
+    head:"Light can weld the antibody to its epitope",
+    lede:"Exciting a fluorophore generates reactive oxygen species, and those species can covalently crosslink the bound antibody onto its epitope. A photo-crosslinked antibody will not elute — it becomes permanent background in every round that follows. 0.7 M N-acetylcysteine at pH 7.4 scavenges the radicals before that happens.",
+    more:"This is the observation 4i is built on: prevent photo-crosslinking and ordinary off-the-shelf antibodies become reusable. Suppressing photobleaching is a welcome side effect, not the main job. NAC's thiol oxidises in air over hours and the oxidised form does nothing, so yesterday's buffer is spent — and the failure is subtle: not a dead well, just background that climbs round after round.",
+    ledger:[
+      ["brk","Reactive oxygen species","Scavenged by NAC before they reach the interface."],
+      ["brk","Photo-crosslinking of antibody to epitope","The specific failure this buffer exists to prevent."]
+    ],
+    callout:"Keep one empty well filled with imaging buffer for shading correction. Without a flat-field reference, illumination falloff across the field looks exactly like a biological gradient.",
+    apply(){
+      set("membrane",0); set("fixed",1); set("perm",1); set("aldQ",1);
+      set("ab1",1); set("ab2",1); set("glow",1);
+    },
+    legend:[["cyan","Excitation"],["rose","Emission"],["mint","NAC"]]
+  },
+  {
+    key:"elute", name:"Elution", sub:"Chaotrope · pH 2.5 · TCEP",
+    t1:"Elution", t2:"Drag each reagent to break its own class of bond",
+    insetTitle:"Elution buffer at work",
+    eyebrow:"Step 7 · elution buffer, 3 × 10 min",
+    head:"Break the antibody off. Leave the sample behind.",
+    lede:"The buffer runs three chemical attacks at once, each aimed at a different interaction. Drag the sliders below and watch which bonds go — and which ones don't.",
+    more:"",
+    interactive:true,
+    apply(){
+      set("membrane",0); set("fixed",1); set("perm",1); set("aldQ",1);
+      set("ab1",1); set("ab2",1); set("glow",0);
+    },
+    legend:[]
+  },
+  {
+    key:"iter", name:"Next round", sub:"Re-block, re-stain",
+    t1:"Iteration", t2:"Same cells, same coordinates, new antibodies",
+    insetTitle:"Accumulating channels",
+    eyebrow:"Step 8 · repeat",
+    head:"The measurements stack up on the same cells",
+    lede:"Re-block, apply the next primary, image, elute again. Hoechst is re-applied every round — it's non-covalent too, so it elutes, and re-staining it gives the pipeline a bright invariant channel for registering images across cycles.",
+    more:"",
+    ledger:[
+      ["make","New antibody pair","On the exact same cells, at the exact same coordinates."],
+      ["brk","Free thiols from the last elution","TCEP made them. Maleimide caps them before the next primary goes on."]
+    ],
+    callout:"Cost of the method: each elution partially denatures your antigens too. Antibody performance degrades in later rounds — put your weakest and most important targets early.",
+    apply(){
+      set("membrane",0); set("fixed",1); set("perm",1); set("aldQ",1);
+      set("thiolsOn",0); set("thiolCap",1);
+      set("ab1",0); set("ab2",0); set("glow",0);
+      set("chao",0); set("acid",0); set("tcep",0);
+    },
+    legend:[["amber","Still covalently intact"]]
+  },
+  {
+    key:"analyze", name:"Analysis", sub:"Per-cell protein profiles",
+    t1:"Computational pipeline", t2:"Segment, quantify, classify",
+    insetTitle:"Single-cell protein space",
+    eyebrow:"Step 9 · analysis",
+    head:"The correlation is the whole point",
+    lede:"Images from every round are registered on the Hoechst channel, cells are segmented, and each one gets a vector of protein measurements. You can compute ratios like pRB/RB per cell and classify proliferative state.",
+    more:"Bulk viability can't tell the difference between a drug that kills 70% of cells and leaves an intrinsically resistant 30% untouched, and a drug that partially inhibits every cell. Those are completely different clinical stories, and this is how you tell them apart.",
+    ledger:[],
+    callout:"Which is why the abemaciclib response in a DDLPS tumour is worth measuring one cell at a time: MDM2 and CDK4 sit on the same 12q amplicon, and the surviving population is the question.",
+    apply(){
+      set("membrane",0); set("fixed",1); set("perm",1); set("aldQ",1);
+      set("ab1",0); set("ab2",0); set("glow",0);
+    },
+    legend:[]
+  }
+];
+
+/* ============================================================
+   Rendering the chrome
+   ============================================================ */
+const rail = document.getElementById("rail");
+STEPS.forEach((st, i) => {
+  const li = document.createElement("li");
+  const b = document.createElement("button");
+  b.className = "step";
+  b.innerHTML = `<span class="dot">${i+1}</span>
+    <span class="step-txt"><span class="step-name">${st.name}</span>
+    <span class="step-sub">${st.sub}</span></span>`;
+  b.addEventListener("click", () => goto(i));
+  li.appendChild(b);
+  rail.appendChild(li);
+});
+
+const SWATCH = {
+  amber:  c => `<svg width="18" height="10"><line x1="1" y1="5" x2="17" y2="5" stroke="#f0b429" stroke-width="3" stroke-linecap="round"/></svg>`,
+  cyan:   c => `<svg width="18" height="10"><line x1="1" y1="5" x2="17" y2="5" stroke="#4fc3e8" stroke-width="2.4" stroke-dasharray="4 3" stroke-linecap="round"/></svg>`,
+  slate:  c => `<svg width="18" height="10"><line x1="1" y1="5" x2="17" y2="5" stroke="#8296a6" stroke-width="2.6" stroke-dasharray="1.5 4" stroke-linecap="round"/></svg>`,
+  rose:   c => `<svg width="18" height="10"><line x1="1" y1="5" x2="17" y2="5" stroke="#f2685b" stroke-width="2.8" stroke-linecap="round"/></svg>`,
+  disulf: c => `<svg width="18" height="10"><line x1="1" y1="5" x2="17" y2="5" stroke="#e0bd3a" stroke-width="3" stroke-linecap="round"/></svg>`,
+  thiol:  c => `<svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="#e0bd3a"/></svg>`,
+  quench: c => `<svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="#5f7484"/></svg>`,
+  violet: c => `<svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="#8b79c4"/></svg>`,
+  nucp:   c => `<svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="#b9a2ec"/></svg>`,
+  cytp:   c => `<svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="#e79ac9"/></svg>`,
+  nucenv: c => `<svg width="20" height="12"><circle cx="6" cy="6" r="3" fill="none" stroke="#8fd0ec" stroke-width="1.8"/><circle cx="15" cy="3" r="2.2" fill="#7fc0dd"/><circle cx="15" cy="9" r="2.2" fill="#5a9ec0"/></svg>`,
+  mint:   c => `<svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="#35bfa8"/></svg>`,
+  orange: c => `<svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="#ff8a3d"/></svg>`,
+  lipid:  c => `<svg width="18" height="12"><circle cx="5" cy="4" r="3.2" fill="#7fb8d4"/><circle cx="13" cy="4" r="3.2" fill="#7fb8d4"/><line x1="5" y1="7" x2="5" y2="11" stroke="#4e7f99" stroke-width="1.6"/><line x1="13" y1="7" x2="13" y2="11" stroke="#4e7f99" stroke-width="1.6"/></svg>`
+};
+
+const strip = document.getElementById("strip");
+const notes = document.getElementById("notes");
+
+function renderChrome(){
+  const st = STEPS[S.step];
+
+  // rail state
+  [...rail.querySelectorAll(".step")].forEach((b,i) => {
+    b.classList.toggle("active", i === S.step);
+    b.classList.toggle("done", i < S.step);
+  });
+
+  document.getElementById("fieldT1").textContent = st.t1;
+  document.getElementById("fieldT2").textContent = st.t2;
+  L.insetTitle.textContent = st.insetTitle || "";
+
+  // --- strip ---
+  if (st.interactive){
+    strip.innerHTML = `<div class="sliders">
+      <div class="sl">
+        <div class="sl-top"><span class="sl-name">Chaotrope</span><span class="sl-val" id="vChao">0 M</span></div>
+        <input type="range" id="sChao" min="0" max="100" value="0" aria-label="Chaotrope concentration">
+        <div class="sl-note" id="nChao">Urea + guanidinium. Competes for hydrogen bonds and collapses the hydrophobic effect.</div>
+      </div>
+      <div class="sl">
+        <div class="sl-top"><span class="sl-name">Acid</span><span class="sl-val" id="vAcid">pH 7.4</span></div>
+        <input type="range" id="sAcid" min="0" max="100" value="0" aria-label="Acidity">
+        <div class="sl-note" id="nAcid">Glycine-HCl. Protonates every Asp and Glu, so salt bridges stop existing.</div>
+      </div>
+      <div class="sl">
+        <div class="sl-top"><span class="sl-name">TCEP</span><span class="sl-val" id="vTcep">0 mM</span></div>
+        <input type="range" id="sTcep" min="0" max="100" value="0" aria-label="TCEP concentration">
+        <div class="sl-note" id="nTcep">Reduces disulfides. Works at pH 2.5 because it's a phosphine — DTT would be inert here.</div>
+      </div>
+    </div>`;
+    bindSliders();
+  } else {
+    const items = (st.legend||[]).map(([k,label]) =>
+      `<span class="lg" data-k="${k}">${SWATCH[k]?SWATCH[k]():""}<b>${label}</b></span>`).join("");
+    strip.innerHTML = `<div class="legend">${items || '<span class="lg">&nbsp;</span>'}</div>`;
+  }
+
+  // --- notes ---
+  let html = `<p class="eyebrow">${st.eyebrow}</p><h3>${st.head}</h3>`;
+  html += `<p class="lede">${st.lede}</p>`;
+  if (st.chem) html += `<div class="chem">${st.chem}</div>`;
+  if (st.more) html += `<p class="more">${st.more}</p>`;
+  if (st.ledger && st.ledger.length){
+    html += `<div class="ledger">` + st.ledger.map(([kind,t,sub]) =>
+      `<div class="lrow"><span class="ltag ${kind==='make'?'make':'brk'}">${kind==='make'?'FORMS':'BREAKS'}</span>
+       <span class="ltxt"><b>${t}</b><em>${sub}</em></span></div>`).join("") + `</div>`;
+  }
+  if (st.key === "elute") html += eluteNotes();
+  if (st.callout) html += `<div class="callout">${st.callout}</div>`;
+  if (st.key === "iter" || st.key === "analyze"){
+    html += `<div class="markers">` + MARKERS.map((m,i) =>
+      `<span class="mk ${i < S.round ? 'lit':''}">${m}</span>`).join("") + `</div>`;
+  }
+  html += `<div class="nav">
+     <button class="btn" id="bPrev" ${S.step===0?"disabled":""}>Back</button>
+     <button class="btn primary" id="bNext">${nextLabel()}</button>
+   </div>`;
+  notes.innerHTML = html;
+  notes.scrollTop = 0;
+
+  document.getElementById("bPrev").onclick = () => goto(S.step-1);
+  document.getElementById("bNext").onclick = onNext;
+
+  document.getElementById("roundNum").textContent = S.round;
+  const n = Math.min(S.round-1, 12);
+  document.getElementById("mkCount").textContent = `· ${n} marker${n===1?"":"s"} imaged`;
+
+  paintIterStack();
+}
+
+function nextLabel(){
+  const st = STEPS[S.step];
+  if (st.key === "iter") return S.round >= 4 ? "Go to analysis" : "Run round " + (S.round+1);
+  if (st.key === "analyze") return "Start over";
+  return "Next";
+}
+function onNext(){
+  const st = STEPS[S.step];
+  if (st.key === "iter"){
+    if (S.round >= 4){ goto(9); return; }
+    S.round++;
+    goto(3);                    // back to blocking for the new round
+    return;
+  }
+  if (st.key === "analyze"){ S.round = 1; goto(0); return; }
+  goto(S.step+1);
+}
+
+function eluteNotes(){
+  const c = S.v.chao[1], a = S.v.acid[1], t = S.v.tcep[1];
+  const rows = [
+    ["Hydrogen bonds", c > .45, "Chaotrope"],
+    ["Hydrophobic contact", c > .6, "Chaotrope"],
+    ["Salt bridges", a > .5, "Acid"],
+    ["Antibody disulfides", t > .5, "TCEP"],
+    ["Methylene bridges", false, "—"]
+  ];
+  let h = `<div class="ledger">`;
+  rows.forEach(([name, broken, by], i) => {
+    const isCov = i === 4;
+    h += `<div class="lrow">
+      <span class="ltag ${broken?'brk':'make'}">${broken?'BROKEN':(isCov?'INTACT':'HOLDING')}</span>
+      <span class="ltxt"><b>${name}</b><em>${isCov
+        ? 'Covalent C–N. Nothing in this buffer touches it.'
+        : (broken ? by + ' did this.' : 'Needs ' + (by === 'TCEP' ? by : by.toLowerCase()) + '.')}</em></span></div>`;
+  });
+  h += `</div>`;
+  const gone = c > .6 && a > .5 && t > .5;
+  h += `<div class="callout"><b>${gone
+    ? 'Antibody gone. Specimen untouched.'
+    : 'Turn all three up.'}</b> ${gone
+    ? 'Every non-covalent interaction is broken and the IgG has come apart at its interchain disulfides, so it cannot refold and rebind. The antigen never moved — it is covalently bridged into the cell.'
+    : 'Each reagent only breaks its own class of bond. Chaotrope alone leaves the salt bridges holding; acid alone leaves the hydrogen bonding intact. The buffer needs all three.'}</div>`;
+  return h;
+}
+
+function bindSliders(){
+  const map = [["sChao","chao","vChao","nChao"],["sAcid","acid","vAcid","nAcid"],["sTcep","tcep","vTcep","nTcep"]];
+  map.forEach(([id,key,vid]) => {
+    const inp = document.getElementById(id);
+    inp.value = Math.round(S.v[key][1]*100);
+    inp.addEventListener("input", () => {
+      S.v[key][1] = inp.value/100;
+      updateSliderLabels();
+      // refresh only the ledger portion of the notes
+      const st = STEPS[S.step];
+      if (st.key === "elute") renderEluteLedger();
+    });
+  });
+  updateSliderLabels();
+}
+function updateSliderLabels(){
+  const q = id => document.getElementById(id);
+  if (!q("vChao")) return;
+  q("vChao").textContent = (S.v.chao[1]*3).toFixed(1) + " M";
+  q("vAcid").textContent = "pH " + (7.4 - S.v.acid[1]*4.9).toFixed(1);
+  q("vTcep").textContent = Math.round(S.v.tcep[1]*70) + " mM";
+}
+function renderEluteLedger(){
+  // replace the ledger + callout block in place, keep sliders focused
+  const st = STEPS[S.step];
+  let html = `<p class="eyebrow">${st.eyebrow}</p><h3>${st.head}</h3>`;
+  html += `<p class="lede">${st.lede}</p>` + eluteNotes();
+  html += `<div class="nav">
+     <button class="btn" id="bPrev">Back</button>
+     <button class="btn primary" id="bNext">Next</button></div>`;
+  const sc = notes.scrollTop;
+  notes.innerHTML = html;
+  notes.scrollTop = sc;
+  document.getElementById("bPrev").onclick = () => goto(S.step-1);
+  document.getElementById("bNext").onclick = onNext;
+}
+
+/* ============================================================
+   Navigation
+   ============================================================ */
+function goto(i){
+  S.step = clamp(i, 0, STEPS.length-1);
+  const st = STEPS[S.step];
+  st.apply();
+  // show the right inset scene
+  for (const k in L.sc) L.sc[k].setAttribute("opacity", k === st.key ? "1" : "0");
+  renderChrome();
+}
+
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === "Escape" && !aboutEl.hidden){ toggleAbout(false); return; }
+  if (!aboutEl.hidden) return;
+  if (e.key === "ArrowRight" || e.key === " "){ e.preventDefault(); onNext(); }
+  else if (e.key === "ArrowLeft"){ e.preventDefault(); goto(S.step-1); }
+  else if (e.key.toLowerCase() === "x"){ toggleCov(); }
+  else if (e.key.toLowerCase() === "f"){ toggleFs(); }
+});
+
+function toggleCov(){
+  S.covMode = !S.covMode;
+  document.getElementById("btnCov").classList.toggle("on", S.covMode);
+}
+document.getElementById("btnCov").onclick = toggleCov;
+
+function toggleFs(){
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+}
+document.getElementById("btnFs").onclick = toggleFs;
+
+const aboutEl = document.getElementById("about");
+document.getElementById("aboutAuthor").innerHTML =
+  `<b>${AUTHOR.name}</b> · ${AUTHOR.role}`;
+document.getElementById("aboutContact").innerHTML =
+  AUTHOR.links.map(([label, href, shown]) => {
+    const ext = href.startsWith("mailto:") ? "" : ` target="_blank" rel="noopener"`;
+    return `<li><span class="ct-k">${label}</span><a href="${href}"${ext}>${shown}</a></li>`;
+  }).join("");
+function toggleAbout(open){
+  aboutEl.hidden = (open === undefined) ? !aboutEl.hidden : !open;
+}
+document.getElementById("btnAbout").onclick = () => toggleAbout(true);
+document.getElementById("bylineLink").onclick = e => { e.preventDefault(); toggleAbout(true); };
+document.getElementById("aboutX").onclick = () => toggleAbout(false);
+aboutEl.addEventListener("click", e => { if (e.target === aboutEl) toggleAbout(false); });
+
+document.getElementById("btnSvg").onclick = () => {
+  const clone = svg.cloneNode(true);
+  clone.setAttribute("xmlns", NS);
+  clone.setAttribute("width", "980");
+  clone.setAttribute("height", "640");
+  const bg = document.createElementNS(NS, "rect");
+  bg.setAttribute("width","980"); bg.setAttribute("height","640"); bg.setAttribute("fill","#0b1c27");
+  clone.insertBefore(bg, clone.firstChild);
+  // inline the label styles so Illustrator keeps them
+  clone.querySelectorAll("text").forEach(t => {
+    const c = t.getAttribute("class") || "";
+    t.setAttribute("font-family", "Helvetica, Arial, sans-serif");
+    if (!t.getAttribute("fill"))
+      t.setAttribute("fill", c.includes("lbl-b") ? "#dcecf4" : "#8fb3c6");
+    if (!t.getAttribute("font-size"))
+      t.setAttribute("font-size", c.includes("lbl-sm") ? "9.5" : "11");
+  });
+  const s = new XMLSerializer().serializeToString(clone);
+  const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + s], {type:"image/svg+xml"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "4i_" + STEPS[S.step].key + ".svg";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+};
+
+/* ============================================================
+   Animation loop
+   ============================================================ */
+let t0 = performance.now();
+function tick(now){
+  const dt = Math.min(50, now - t0); t0 = now;
+  const T = now / 1000;
+  const k = REDUCED ? 1 : 1 - Math.pow(0.004, dt/1000);
+
+  for (const key in S.v){
+    const v = S.v[key];
+    v[0] = REDUCED ? v[1] : lerp(v[0], v[1], k);
+  }
+
+  const mem = cur("membrane"), fix = cur("fixed"), perm = cur("perm");
+  const aldQ = cur("aldQ"), ab1 = cur("ab1"), ab2 = cur("ab2"), glow = cur("glow");
+  const chao = cur("chao"), acid = cur("acid"), tcep = cur("tcep");
+  const stKey = STEPS[S.step].key;
+
+  /* --- main view: nuclear envelope --- */
+  if (L.nucEnvNodes) L.nucEnvNodes.forEach((ne, i) => {
+    const open = 1 - mem;
+    const push = open * (7 + 11 * ((i*29 % 9)/9));
+    ne.node.setAttribute("transform", `translate(${(ne.nx*push).toFixed(2)},${(ne.ny*push).toFixed(2)})`);
+    ne.node.setAttribute("opacity", (0.22 + 0.78*mem).toFixed(3));
+  });
+
+  /* --- main view: membrane --- */
+  L.lipids.forEach((lp, i) => {
+    const open = (1 - mem);
+    // lipids drift outward and fade as permeabilization proceeds
+    const push = open * (18 + 26 * ((i*37 % 11)/11));
+    const wob = REDUCED ? 0 : Math.sin(T*1.6 + lp.seed) * 1.1 * mem;
+    lp.node.setAttribute("transform",
+      `translate(${lp.nx*(push+wob)}, ${lp.ny*(push+wob)})`);
+    lp.node.setAttribute("opacity", (0.15 + 0.85*mem).toFixed(3));
+  });
+  L.cyto.setAttribute("opacity", (0.55 + 0.45*mem).toFixed(3));
+
+  /* --- main view: proteins --- */
+  L.protNodes.forEach((pn, i) => {
+    const jig = REDUCED ? 0 : (1 - fix) * 3.4;
+    const dx = jig * Math.sin(T*0.9 + pn.seed);
+    const dy = jig * Math.cos(T*1.13 + pn.seed*1.7);
+    pn.grp.setAttribute("transform", `translate(${dx.toFixed(2)},${dy.toFixed(2)})`);
+    // free aldehydes visible after fixation, quenched by blocking
+    pn.ald.setAttribute("opacity", (fix * (1-aldQ) * 0.95).toFixed(3));
+    pn.thi.setAttribute("opacity", "0");
+  });
+  if (L.protNodes[TARGET].ring){
+    const on = (stKey==="ab1"||stKey==="ab2"||stKey==="image"||stKey==="elute") ? 1 : 0;
+    L.protNodes[TARGET].ring.setAttribute("opacity", (on*0.55).toFixed(2));
+    if (!REDUCED) L.protNodes[TARGET].ring.setAttribute("stroke-dashoffset", (-T*14).toFixed(1));
+  }
+
+  /* --- main view: methylene bridges --- */
+  L.bridgeNodes.forEach((b, i) => {
+    const phase = clamp(fix*1.6 - i*0.06, 0, 1);
+    b.line.setAttribute("stroke-dashoffset", (b.len * (1 - phase)).toFixed(2));
+    let o = phase * 0.95;
+    if (S.covMode) o = Math.min(1, o * 1.15);
+    b.line.setAttribute("opacity", o.toFixed(3));
+    b.line.setAttribute("stroke-width", S.covMode ? 3.6 : 2.4);
+  });
+
+  /* --- covalent-highlight mode dims the rest --- */
+  const dim = S.covMode ? 0.2 : 1;
+  L.proteins.setAttribute("opacity", S.covMode ? 0.45 : 1);
+  L.membrane.setAttribute("opacity", dim);
+  L.nucleus.setAttribute("opacity", (0.92*dim).toFixed(2));
+  if (L.nucEnv) L.nucEnv.setAttribute("opacity", dim);
+  if (L.cytoskel) L.cytoskel.setAttribute("opacity", dim);
+  if (L.compLabels) L.compLabels.setAttribute("opacity", dim);
+
+  /* --- main view: small antibody indicator --- */
+  paintMainAb(ab1, ab2, glow, T);
+
+  /* --- inset scenes --- */
+  if (stKey === "live"){
+    L.liveProts.forEach((p,i) => {
+      const dx = REDUCED?0:Math.sin(T*0.8 + p.seed)*9;
+      const dy = REDUCED?0:Math.cos(T*0.62 + p.seed*1.4)*7;
+      p.node.setAttribute("transform", `translate(${dx.toFixed(2)},${dy.toFixed(2)})`);
+    });
+  }
+  if (stKey === "fix"){
+    const f = clamp(fix, 0, 1);
+    L.fixCH2O.setAttribute("opacity", (1-f*0.85).toFixed(2));
+    L.fixCH2O.setAttribute("transform", `translate(0, ${(f*46).toFixed(1)})`);
+    L.fixBridge.setAttribute("opacity", clamp((f-0.35)/0.5, 0, 1).toFixed(2));
+    L.fixAld.setAttribute("opacity", clamp((f-0.7)/0.3, 0, 1).toFixed(2));
+  }
+  if (stKey === "perm"){
+    L.permMic.setAttribute("opacity", perm.toFixed(2));
+    L.permMic.setAttribute("transform", `translate(0,${(-perm*54).toFixed(1)})`);
+    L.permIgG.setAttribute("opacity", clamp((perm-0.5)/0.5,0,1).toFixed(2));
+    L.permIgG.setAttribute("transform", `translate(0,${(perm*54).toFixed(1)})`);
+    // open a gap in the patch
+    L.permBi.querySelectorAll("circle,line").forEach((n,i) => {
+      const mid = Math.abs((i % 44) - 22) / 22;
+      n.setAttribute("opacity", (1 - perm*(1-mid)*0.95).toFixed(2));
+    });
+  }
+  if (stKey === "block"){
+    const q = aldQ;
+    L.blkAld.setAttribute("fill", q > .5 ? "#5f7484" : "#ff8a3d");
+    L.blkAld.setAttribute("r", (11 - q*3).toFixed(1));
+    L.blkThi.setAttribute("fill", q > .5 ? "#5f7484" : "#f5d76e");
+    L.blkThi.setAttribute("r", (11 - q*3).toFixed(1));
+    L.blkAldOut.setAttribute("opacity", q.toFixed(2));
+    L.blkThiOut.setAttribute("opacity", q.toFixed(2));
+    L.blkNH4.setAttribute("opacity", (1-q*0.45).toFixed(2));
+    L.blkMal.setAttribute("opacity", (1-q*0.45).toFixed(2));
+  }
+  if (stKey === "ab2"){
+    L.ab2Nodes.forEach((n,i) => {
+      n.setAttribute("opacity", clamp(ab2*1.5 - i*0.28, 0, 1).toFixed(2));
+    });
+  }
+  if (stKey === "image"){
+    const pulse = REDUCED ? 1 : 0.72 + 0.28*Math.sin(T*3.1);
+    L.imgFluor.setAttribute("opacity", (glow*pulse).toFixed(2));
+    L.imgEm.setAttribute("opacity", (glow*pulse).toFixed(2));
+    L.imgEx.setAttribute("opacity", (glow*0.9).toFixed(2));
+    const nac = REDUCED ? 1 : 0.5 + 0.5*Math.sin(T*1.4);
+    L.imgNAC.setAttribute("opacity", (glow*nac).toFixed(2));
+    L.imgROS.setAttribute("opacity", (glow*(1-nac*0.75)).toFixed(2));
+    L.nucGlow.setAttribute("opacity", (glow*0.28*pulse).toFixed(3));
+  } else {
+    L.nucGlow.setAttribute("opacity", "0");
+  }
+  if (stKey !== "elute" && L.elVerdict){
+    L.elVerdict.textContent = ""; L.elSub.textContent = "";
+  }
+  if (stKey === "elute"){
+    paintElution(chao, acid, tcep, T);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+/* --- main-view antibody indicator --- */
+let mainAbBuilt = false;
+function paintMainAb(ab1, ab2, glow, T){
+  if (!mainAbBuilt){
+    const p = PROTEINS[TARGET];
+    const o = drawIgG(L.abMain, p.x, p.y - 46, .52, "#35bfa8", null, "mainAb1");
+    L.mainAb1 = o.grp;
+    L.mainAb1.setAttribute("transform", `translate(${p.x},${p.y-14}) rotate(180) scale(.52)`);
+    L.mainAb2 = g(L.abMain);
+    const o2 = drawIgG(L.mainAb2, p.x-26, p.y-72, .40, "#c6d2da", "#f2685b");
+    const o3 = drawIgG(L.mainAb2, p.x+26, p.y-72, .40, "#c6d2da", "#f2685b");
+    mainAbBuilt = true;
+  }
+  L.mainAb1.setAttribute("opacity", ab1.toFixed(2));
+  L.mainAb2.setAttribute("opacity", ab2.toFixed(2));
+}
+
+/* --- elution painting --- */
+function paintElution(chao, acid, tcep, T){
+  // hydrogen bonds die with chaotrope
+  const hAlive = clamp(1 - (chao - .30)/.35, 0, 1);
+  const pAlive = clamp(1 - (chao - .45)/.35, 0, 1);
+  const sAlive = clamp(1 - (acid - .35)/.35, 0, 1);
+
+  L.elBondH.setAttribute("opacity", hAlive.toFixed(2));
+  L.elBondP.setAttribute("opacity", pAlive.toFixed(2));
+  L.elBondS.setAttribute("opacity", sAlive.toFixed(2));
+
+  // disulfides break with TCEP
+  const dsAlive = clamp(1 - (tcep - .35)/.3, 0, 1);
+  L.abDs.setAttribute("opacity", dsAlive.toFixed(2));
+
+  // once everything is loose, the antibody comes apart and drifts away
+  const loose = (1-hAlive)*(1-sAlive);
+  const split = clamp((tcep - .5)/.4, 0, 1) * clamp(loose*1.4, 0, 1);
+  const rise = split * 74;
+  const wob = REDUCED ? 0 : Math.sin(T*1.7)*6*split;
+
+  const hx = INSET.cx, hy = INSET.cy - 20;   // the hinge the Fab arms pivot on
+  L.abFabL.setAttribute("transform",
+    `translate(${(-52*split+wob).toFixed(1)},${(-rise*0.88).toFixed(1)}) rotate(${(-34*split).toFixed(1)},${hx},${hy})`);
+  L.abFabR.setAttribute("transform",
+    `translate(${(52*split-wob).toFixed(1)},${(-rise*0.94).toFixed(1)}) rotate(${(34*split).toFixed(1)},${hx},${hy})`);
+  L.abFc.setAttribute("transform",   `translate(${(wob*0.4).toFixed(1)},${(-rise*1.02).toFixed(1)})`);
+  L.eluteAb.setAttribute("opacity", (1 - split*0.62).toFixed(2));
+
+  // the covalent anchors never change — emphasise that
+  L.eluteBridges.setAttribute("stroke-width", "3.4");
+  L.eluteBridges.setAttribute("opacity", S.covMode ? "1" : "0.95");
+
+  const done = chao > .6 && acid > .5 && tcep > .5;
+  L.elVerdict.textContent = done ? "Antibody eluted" : "Still bound";
+  L.elVerdict.setAttribute("fill", done ? "#35bfa8" : "#8fb3c6");
+  L.elSub.textContent = done ? "Antigen unmoved — covalently bridged in place" : "";
+}
+
+/* ============================================================
+   Boot
+   ============================================================ */
+buildScene();
+goto(0);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
