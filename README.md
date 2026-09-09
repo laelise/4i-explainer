@@ -12,15 +12,15 @@ An interactive walkthrough of the chemistry behind **iterative indirect immunofl
 
 ## Why this exists
 
-Most explanations of 4i stop at "you elute the antibody and stain again." That skips the part that makes the method work.
+When I first learned 4i, I focused on cranking out data and learning the wet lab steps as fast as possible, so I neglected the chemistry behind the method. Over time, I started noticing small details in my methodology that affected how the next elution turned out. So I started exploring the chemistry and what is actually happening to make 4i possible. Knowing the chemistry behind it all has helped me run cleaner experiments and remind myself not to be lazy with measurements (aka, the "that's close enough" mindset), which has made the difference between getting 15-20 features instead of only 7-10 on my samples. 
 
-In a PFA-fixed sample the antigen is held in place by **covalent** methylene bridges, while the antibody is held on by **non-covalent** affinity alone. The elution buffer is built to break one and not the other. This explainer makes that asymmetry something you can watch happen.
+In a PFA-fixed sample, the antigen is held in place by **covalent** methylene bridges, while the antibody is held on by **non-covalent** affinity alone. The elution buffer is built to break one and not the other. This interactive walkthrough lets you watch that asymmetry happen.
 
 ## What's in it
 
 Ten steps, from live cell through analysis. Each one pairs a molecular animation with the specific chemistry involved.
 
-The centrepiece is **step 8**. Elution gets three independent controls — chaotrope, pH, and TCEP — and each one only breaks its own class of bond:
+What I want to highlight is **step 8**. Elution gets three independent controls — chaotrope, pH, and TCEP — and each one only breaks its own class of bond:
 
 | Reagent | What it breaks |
 |---|---|
@@ -28,7 +28,7 @@ The centrepiece is **step 8**. Elution gets three independent controls — chaot
 | Glycine-HCl, pH 2.5 | Salt bridges — every Asp and Glu is protonated |
 | TCEP, 70 mM | Interchain disulfides, so the IgG can't refold and rebind |
 
-Turn up chaotrope alone and the salt bridges still hold. Add acid and those go, but the antibody stays assembled. Only with all three does it come apart and wash off — while the amber methylene bridges never move.
+Turn up chaotrope alone, and the salt bridges still hold. Add acid and those go, but the antibody stays assembled. Only with all three does it come apart and wash off — while the amber methylene bridges never move.
 
 Press **X** at any point to dim everything non-covalent and leave only the permanent bonds lit.
 
@@ -48,14 +48,6 @@ Keyboard: `←` `→` to step, `X` for covalent-only, `F` for full screen, `Esc`
 
 **Export SVG** downloads whatever is currently on screen, with the slider positions baked in. SVG opens natively in Illustrator, Inkscape, and Affinity with every path and text object still editable — so you can export the elution step at three different slider settings and restyle them into a figure panel.
 
-## Editing it
-
-Everything lives in `index.html`. The parts you're most likely to want:
-
-- `const AUTHOR` — near the top of the `<script>`. Your name and affiliation for the About panel.
-- `const CELL_OUTLINE` and `const NUC` — the cell geometry. Protein positions are solved against these at load time, so you can reshape the cell and nothing will poke through a membrane.
-- `const STEPS` — the step list. Each entry holds its own copy, chemistry block, and bond ledger.
-- `const MARKERS` — the marker chips that light up as rounds accumulate.
 
 ## About the method
 
@@ -86,7 +78,7 @@ Built by **Lauryn Elise Bailey** — [Purvis Lab](https://www.med.unc.edu/geneti
 
 ## Citing this
 
-If it's useful in a talk or a course, a link is plenty. If you'd rather cite it formally, see `CITATION.cff` — GitHub renders a "Cite this repository" button from it.
+If it's useful in a talk or a course, a link with the author's name is plenty. If you'd rather cite it formally, see `CITATION.cff` — GitHub renders a "Cite this repository" button from it.
 
 > Bailey LE. *4i, explained interactively.* 2026. https://laelise.github.io/4i-explainer/
 
