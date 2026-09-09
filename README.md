@@ -2,7 +2,8 @@
 
 An interactive walkthrough of the chemistry behind **iterative indirect immunofluorescence imaging (4i)** — what bonds form at each step, what the elution buffer actually breaks, and why the fixed cells can survive being chemically stripped multiple times.
 
-**[▶ Open the explainer](<img width="941" height="702" alt="Screenshot 2026-09-09 at 5 56 35 PM" src="https://github.com/user-attachments/assets/78694de4-038a-48f9-b63c-8e254e81c14f" />)**
+**[▶ Open the explainer](https://laelise.github.io/4i-explainer/)**
+
 
 <!-- Add a screenshot or GIF here once you have one:
 ![Screenshot of the elution step](docs/elution.png)
