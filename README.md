@@ -33,17 +33,6 @@ Turn up chaotrope alone, and the salt bridges still hold. Add acid and those go,
 
 Press **X** at any point to dim everything non-covalent and leave only the permanent bonds lit.
 
-## Running it
-
-It's a single self-contained HTML file. No build step, no dependencies, no network access required.
-
-```bash
-git clone https://github.com/laelise/4i-explainer.git
-cd 4i-explainer
-open index.html          # or just double-click it
-```
-
-Keyboard: `←` `→` to step, `X` for covalent-only, `F` for full screen, `Esc` to close the About panel.
 
 ## Using the figures
 
